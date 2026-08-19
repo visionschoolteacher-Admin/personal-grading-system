@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="manifest.json">
+<title>Personal Grading System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="dashboardPage">
+<header class="header"><h1>🎓 Personal Grading System</h1><p>Student Records & Academic Management</p></header>
+<main class="container">
+<section class="welcome"><h2>Welcome</h2><p>Select a workspace to continue.</p></section>
+<section class="workspace-grid">
+<button class="workspace-card" onclick="openWorkspace('wife')"><div class="workspace-icon">👩‍🏫</div><h3>Wife's Workspace</h3><p>Manage students, grades, attendance and academic records.</p></button>
+<button class="workspace-card" onclick="openWorkspace('personal')"><div class="workspace-icon">👨‍🏫</div><h3>My Personal Workspace</h3><p>Manage students, grades, attendance and academic records.</p></button>
+</section>
+<h3 class="section-title">System Features</h3>
+<section class="feature-grid">
+<div class="feature-card"><div class="icon">👨‍🎓</div><h4>Students</h4></div>
+<div class="feature-card"><div class="icon">📊</div><h4>Grade Records</h4></div>
+<div class="feature-card"><div class="icon">📅</div><h4>Attendance</h4></div>
+<div class="feature-card"><div class="icon">📝</div><h4>Daily Notes</h4></div>
+<div class="feature-card"><div class="icon">📚</div><h4>Academic Years</h4></div>
+<div class="feature-card"><div class="icon">📄</div><h4>Report Cards</h4></div>
+<div class="feature-card"><div class="icon">🖨️</div><h4>Print</h4></div>
+<div class="feature-card"><div class="icon">📥</div><h4>Excel Export</h4></div>
+</section>
+</main><footer class="footer">Personal Grading System</footer>
+</div>
+
+<div id="workspacePage" class="hidden">
+<header class="workspace-header">
+<button class="back-button" onclick="goHome()">← Back</button>
+<div><h1 id="workspaceTitle">Workspace</h1><p id="workspaceSubtitle">Academic Management</p></div>
+</header>
+<nav class="workspace-nav">
+<button class="nav-button active" onclick="showSection('students')">👨‍🎓 <span>Students</span></button>
+<button class="nav-button" onclick="showSection('records')">📊 <span>Records</span></button>
+<button class="nav-button" onclick="showSection('attendance')">📅 <span>Attendance</span></button>
+<button class="nav-button" onclick="showSection('notes')">📝 <span>Daily Notes</span></button>
+<button class="nav-button" onclick="showSection('reports')">📄 <span>Report Cards</span></button>
+<button class="nav-button" onclick="showSection('excel')">📥 <span>Excel</span></button>
+</nav>
+<main class="workspace-container">
+
+<section id="studentsSection" class="workspace-section">
+<div class="section-header"><div><h2>👨‍🎓 Students</h2><p>Manage student records for this workspace.</p></div><button class="primary-button" onclick="showStudentForm()">+ Add Student</button></div>
+<div class="filter-row">
+<select id="academicYearSelect" onchange="loadStudents()"><option value="">Select Academic Year</option><option>2026–2027</option><option>2027–2028</option><option>2028–2029</option><option>2029–2030</option><option>2030–2031</option></select>
+<select id="levelSelect"><option value="">Select Level</option><option>Kindergarten 3</option><option>Primary 1</option><option>Primary 2</option><option>Primary 3</option><option>Primary 4</option><option>Primary 5</option><option>Primary 6</option></select>
+</div>
+<div id="studentForm" class="form-card hidden"><h3>Add Student</h3><div class="form-grid">
+<input id="studentId" placeholder="Student ID"><input id="studentName" placeholder="Student Name"><input id="studentSection" placeholder="Class / Section">
+</div><div class="form-actions"><button class="primary-button" onclick="saveStudent()">Save Student</button><button class="secondary-button" onclick="hideStudentForm()">Cancel</button></div></div>
+<div id="studentList" class="empty-state"><div class="empty-icon">👨‍🎓</div><h3>No students yet</h3><p>Add your first student to begin.</p></div>
+</section>
+
+<section id="recordsSection" class="workspace-section hidden">
+<div class="section-header"><div><h2>📊 Grade Records</h2><p>Manage semester grades and grading components.</p></div></div>
+<div class="info-card"><label>Student</label><select id="gradeStudentSelect" onchange="resetGradeView()"><option value="">Select Student</option></select></div>
+<div class="semester-grid">
+<button class="semester-card" onclick="selectSemester('first')"><span>📘</span><strong>First Semester</strong><small>August – December</small></button>
+<button class="semester-card" onclick="selectSemester('second')"><span>📗</span><strong>Second Semester</strong><small>January – May</small></button>
+</div>
+<div id="subjectArea" class="hidden"><h3 class="subsection-title">Select Subject</h3><div class="subject-grid">
+<button class="subject-card" onclick="selectSubject('English')"><span>📖</span><strong>English</strong></button>
+<button class="subject-card" onclick="selectSubject('Mathematics')"><span>➗</span><strong>Mathematics</strong></button>
+<button class="subject-card" onclick="selectSubject('Science')"><span>🔬</span><strong>Science</strong></button>
+</div></div>
+<div id="componentArea" class="hidden">
+<div class="component-header"><div><h3 id="selectedSubjectTitle">Subject</h3><p id="selectedSemesterTitle">Semester</p></div><button class="compute-button" onclick="computeGrades()">🧮 Compute Grades</button></div>
+<div id="gradingComponents" class="grading-components"></div>
+<div id="subjectResult" class="subject-result hidden"><h3>Computed Subject Grade</h3><div id="subjectGradeValue" class="subject-grade-value">0.00%</div><p id="subjectBreakdown"></p></div>
+</div>
+</section>
+
+<section id="attendanceSection" class="workspace-section hidden">
+<div class="section-header"><div><h2>📅 Attendance</h2><p>Record daily attendance. The calculated percentage automatically contributes 5% to every subject.</p></div></div>
+<div class="info-card"><div class="form-grid"><div><label>Academic Year</label><select id="attendanceAcademicYear"><option value="">Select Academic Year</option><option>2026–2027</option><option>2027–2028</option><option>2028–2029</option><option>2029–2030</option><option>2030–2031</option></select></div><div><label>Date</label><input type="date" id="attendanceDate"></div></div></div>
+<div id="attendanceStudentList" class="attendance-list"></div>
+<div id="attendanceSummary" class="attendance-summary hidden"><h3>📊 Monthly Attendance Summary</h3><div class="attendance-summary-grid">
+<div class="attendance-stat"><span>🟢</span><strong id="presentTotal">0</strong><small>Present</small></div>
+<div class="attendance-stat"><span>🔴</span><strong id="absentTotal">0</strong><small>Absent</small></div>
+<div class="attendance-stat"><span>📅</span><strong id="schoolDaysTotal">0</strong><small>School Days</small></div>
+<div class="attendance-stat"><span>📈</span><strong id="attendancePercentage">0%</strong><small>Attendance</small></div>
+</div></div>
+</section>
+
+<section id="notesSection" class="workspace-section hidden">
+<div class="section-header"><div><h2>📝 Daily Notes</h2><p>Save optional notes for individual students.</p></div></div>
+<div class="info-card"><select id="noteStudentSelect"><option value="">Select Student</option></select><input type="date" id="noteDate"><textarea id="dailyNote" class="daily-note" placeholder="Write a note..."></textarea><button class="primary-button" onclick="saveNote()">Save Note</button></div>
+<div id="notesList" class="notes-list"></div>
+</section>
+
+<section id="reportsSection" class="workspace-section hidden">
+<div class="section-header"><div><h2>📄 Report Cards</h2><p>Generate a printable report card using grades and attendance.</p></div></div>
+<div class="info-card"><select id="reportStudentSelect"><option value="">Select Student</option></select><select id="reportSemester"><option value="first">First Semester</option><option value="second">Second Semester</option></select><button class="primary-button" onclick="generateReportCard()">Generate Report Card</button></div>
+<div id="reportPreview"></div>
+</section>
+
+<section id="excelSection" class="workspace-section hidden">
+<div class="section-header"><div><h2>📥 Excel Records</h2><p>Export your grading and attendance data.</p></div></div>
+<div class="excel-grid">
+<button class="excel-card" onclick="exportDetailedGrades()"><span>📊</span><strong>Detailed Grade Records</strong><small>Export every grading entry as CSV.</small></button>
+<button class="excel-card" onclick="exportGradeSummary()"><span>📈</span><strong>Grade Summary</strong><small>Export calculated subject grades.</small></button>
+<button class="excel-card" onclick="exportAttendanceMonthly()"><span>📅</span><strong>Attendance by Month</strong><small>Student names, Present, Absent, Total and Attendance %.</small></button>
+<button class="excel-card" onclick="exportAttendanceAll()"><span>📚</span><strong>Attendance Detailed</strong><small>Export every attendance entry.</small></button>
+</div>
+<div class="info-card"><h3>Attendance Export</h3><p>The monthly attendance export automatically groups each student's attendance by month and includes totals and attendance percentage.</p></div>
+</section>
+</main></div>
+
+<script src="db.js"></script><script src="app.js"></script>
+</body></html>
