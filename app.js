@@ -2643,7 +2643,7 @@ function getStudentAcademicYear(id) {
   return null;
 }
 
-}
+
 
 
 function getSelectedAcademicYear(){
