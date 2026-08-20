@@ -1,13 +1,11 @@
 {
-  "id": "./",
   "name": "Personal Grading System",
   "short_name": "Grading System",
   "description": "Personal student grading, attendance and academic management system",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": [
-    "window-controls-overlay",
     "standalone"
   ],
   "orientation": "portrait-primary",
@@ -15,8 +13,5 @@
   "theme_color": "#7c3aed",
   "lang": "en",
   "dir": "ltr",
-  "prefer_related_applications": false,
-  "icons": [
-    {
-     "icons": []
+  "prefer_related_applications": false
 }
