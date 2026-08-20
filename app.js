@@ -2626,22 +2626,22 @@ async function calculateSubjectGrade(
 // HELPERS
 // ============================================
 
-function getStudentAcademicYear(id){
+function getStudentAcademicYear(id) {
 
-  const option=
-    document.querySelector(
-      `#gradeStudentSelect option[value="${id}"]`
-    );
+  const option = document.querySelector(
+    `#gradeStudentSelect option[value="${id}"]`
+  );
 
+  if (!option) return null;
 
-  if(!option)return null;
+  // First try the option's stored academic year
+  if (option.dataset.academicYear) {
+    return option.dataset.academicYear;
+  }
 
-
-  return option
-    .textContent
-    .match(/\((.*?)\)$/)
-    ?.[1]
-    ?.trim();
+  // Fallback: get the student from the local database
+  return null;
+}
 
 }
 
