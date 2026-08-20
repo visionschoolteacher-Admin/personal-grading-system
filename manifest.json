@@ -5,13 +5,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone"
-  ],
-  "orientation": "portrait-primary",
   "background_color": "#f5f3ff",
   "theme_color": "#7c3aed",
   "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "dir": "ltr"
 }
