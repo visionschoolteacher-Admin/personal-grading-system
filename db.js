@@ -4,7 +4,7 @@
 // ============================================
 
 const DB_NAME = "personalGradingSystemDB";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 const STORES = {
   students: "students",
