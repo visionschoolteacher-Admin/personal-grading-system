@@ -6,9 +6,8 @@ const FILES = [
   "./style.css",
   "./db.js",
   "./app.js",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./supabase.js",
+  "./manifest.json"
 ];
 
 self.addEventListener("install", event => {
@@ -35,10 +34,8 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
 
       return fetch(event.request)
         .then(response => {
@@ -46,17 +43,15 @@ self.addEventListener("fetch", event => {
             return response;
           }
 
-          const responseClone = response.clone();
+          const copy = response.clone();
 
           caches.open(CACHE).then(cache => {
-            cache.put(event.request, responseClone);
+            cache.put(event.request, copy);
           });
 
           return response;
         })
-        .catch(() => {
-          return caches.match("./index.html");
-        });
+        .catch(() => caches.match("./index.html"));
     })
   );
 });
