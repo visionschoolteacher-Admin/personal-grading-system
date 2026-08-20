@@ -8,11 +8,12 @@ const SUPABASE_URL = "https://julbkukshbjkstnfhdrw.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_2R7dxY2-PtWBZWg2IgyZkA_Epfy129v";
 
-const supabaseClient = window.supabase.createClient(
+window.supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
 
+const supabaseClient = window.supabaseClient;
 console.log("Supabase client initialized.");
 
 async function testSupabaseConnection() {
