@@ -2,9 +2,13 @@
   "name": "Personal Grading System",
   "short_name": "Grading System",
   "description": "Personal student grading, attendance and academic management system",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone"
+  ],
+  "orientation": "portrait-primary",
   "background_color": "#f5f3ff",
   "theme_color": "#7c3aed",
   "lang": "en",
