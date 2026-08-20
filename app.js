@@ -1148,7 +1148,7 @@ async function saveGradeRecord(){
     workspace:currentWorkspace,
 
     academicYear:
-      getStudentAcademicYear(studentId),
+  (await getRecord(STORES.students, studentId))?.academicYear || "",
 
     semester:selectedSemester,
 
