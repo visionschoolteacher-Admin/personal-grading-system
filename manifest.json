@@ -6,14 +6,8 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone"
-  ],
-  "orientation": "portrait-primary",
   "background_color": "#f5f3ff",
   "theme_color": "#7c3aed",
   "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "dir": "ltr"
 }
