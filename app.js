@@ -2324,13 +2324,11 @@ async function loadReportStudents(){
 
 async function generateReportCard(){
 
-  const sid=
+  const sid =
     Number(reportStudentSelect.value);
 
-
-  const sem=
+  const sem =
     reportSemester.value;
-
 
   if(!sid){
 
@@ -2338,6 +2336,29 @@ async function generateReportCard(){
       "Please select a student."
     );
 
+  }
+
+  const s =
+    await getRecord(
+      STORES.students,
+      sid
+    );
+
+  // Student was deleted
+  if(!s){
+
+    await loadReportStudents();
+
+    reportPreview.innerHTML = "";
+
+    return alert(
+      "This student no longer exists. Please select another student."
+    );
+
+  }
+
+  const year =
+    s.academicYear;
   }
 
 
