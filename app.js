@@ -2165,10 +2165,11 @@ function getSemesterFromDate(date) {
     return null;
   }
 
-  const month = parseInt(
-    date.substring(5, 7),
-    10
-  );
+  const month =
+    parseInt(
+      date.substring(5, 7),
+      10
+    );
 
   if (month >= 8 && month <= 12) {
     return "first";
