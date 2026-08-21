@@ -1831,17 +1831,15 @@ async function loadAttendance(){
 async function setAttendance(
   studentId,
   status
-){
+) {
 
-  const year=
+  const year =
     attendanceAcademicYear.value;
 
-
-  const date=
+  const date =
     attendanceDate.value;
 
-
-  if(!year||!date){
+  if (!year || !date) {
 
     return alert(
       "Please select academic year and date."
@@ -1849,7 +1847,125 @@ async function setAttendance(
 
   }
 
+  const semester =
+    getSemesterFromDate(date);
 
+  const all =
+    await getAllRecords(
+      STORES.attendance
+    );
+
+  const existing =
+    all.find(
+      a =>
+        a.studentId === studentId &&
+        a.workspace === currentWorkspace &&
+        a.academicYear === year &&
+        a.date === date
+    );
+
+  const s =
+    await getRecord(
+      STORES.students,
+      studentId
+    );
+
+  if (existing) {
+
+    existing.status = status;
+
+    existing.semester = semester;
+
+    existing.month =
+      date.slice(0, 7);
+
+    existing.updatedAt =
+      new Date().toISOString();
+
+    await updateRecord(
+      STORES.attendance,
+      existing
+    );
+
+  } else {
+
+    await addRecord(
+      STORES.attendance,
+      {
+
+        studentId,
+
+        studentName:
+          s?.name || "",
+
+        workspace:
+          currentWorkspace,
+
+        academicYear:
+          year,
+
+        semester,
+
+        date,
+
+        month:
+          date.slice(0, 7),
+
+        status,
+
+        createdAt:
+          new Date().toISOString(),
+
+        updatedAt:
+          new Date().toISOString()
+
+      }
+    );
+
+  }
+
+  await loadAttendance();
+
+}
+
+
+/* =========================================
+   SEMESTER FROM DATE
+   ========================================= */
+
+function getSemesterFromDate(date) {
+
+  if (!date) {
+    return null;
+  }
+
+  const month =
+    parseInt(
+      date.substring(5, 7),
+      10
+    );
+
+  if (
+    month >= 8 &&
+    month <= 12
+  ) {
+
+    return "first";
+
+  }
+
+  if (
+    month >= 1 &&
+    month <= 5
+  ) {
+
+    return "second";
+
+  }
+
+  return null;
+
+}
   const semester=
     getSemesterFromDate(date);
 
