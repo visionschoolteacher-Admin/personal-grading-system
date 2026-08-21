@@ -2043,19 +2043,18 @@ function countSchoolDays(
 }
 
 
-function getSemesterFromDate(d) {
-
-  if (!d) {
+function getSemesterFromDate(date) {
+  if (!date) {
     return null;
   }
 
-  const m = Number(d.slice(5, 7));
+  const month = parseInt(date.substring(5, 7), 10);
 
-  if (m >= 8 && m <= 12) {
+  if (month >= 8 && month <= 12) {
     return "first";
   }
 
-  if (m >= 1 && m <= 5) {
+  if (month >= 1 && month <= 5) {
     return "second";
   }
 
