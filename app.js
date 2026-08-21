@@ -791,7 +791,7 @@ async function removeStudent(id){
 
     await loadStudents();
 
-  }
+    }
 
 }
 
@@ -2141,25 +2141,32 @@ async function saveNote(){
   }
 
 
-  await addRecord(
-    STORES.notes,
-    {
+ const student =
+  await getRecord(
+    STORES.students,
+    sid
+  );
 
-      studentId:sid,
+await addRecord(
+  STORES.notes,
+  {
+    studentId: sid,
 
-      workspace:
-        currentWorkspace,
+    workspace:
+      currentWorkspace,
 
-      academicYear:
-        year,
+    academicYear:
+      student?.academicYear || "",
 
-      date,
+    date,
 
-      note:text,
+    note: text,
 
-      createdAt:
-        new Date().toISOString()
+    createdAt:
+      new Date().toISOString(),
 
+    updatedAt:
+      new Date().toISOString()
     }
   );
 
