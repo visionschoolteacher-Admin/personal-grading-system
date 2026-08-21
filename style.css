@@ -1,4 +1,202 @@
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#f5f3ff,#eef2ff);color:#1f2937}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.header{padding:55px 20px;text-align:center;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}.header h1{margin:0;font-size:2.2rem}.header p{opacity:.9}.container,.workspace-container{max-width:1150px;margin:auto;padding:30px 20px}.welcome{text-align:center;margin-bottom:28px}.workspace-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}.workspace-card{border:0;border-radius:22px;padding:35px;background:#fff;box-shadow:0 10px 30px #0001;text-align:left;transition:.2s}.workspace-card:hover{transform:translateY(-3px)}.workspace-icon{font-size:3rem}.feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.feature-card{background:#fff;padding:22px;border-radius:16px;text-align:center;box-shadow:0 5px 20px #0000000d}.feature-card .icon{font-size:1.8rem}.section-title{text-align:center;margin-top:40px}.footer{text-align:center;padding:25px;color:#6b7280}.workspace-header{display:flex;align-items:center;gap:20px;padding:25px max(20px,calc((100% - 1150px)/2));background:#fff;box-shadow:0 3px 15px #0001}.workspace-header h1{margin:0}.workspace-header p{margin:5px 0;color:#6b7280}.back-button{border:0;background:#f3f4f6;padding:10px 15px;border-radius:10px}.workspace-nav{display:flex;gap:8px;justify-content:center;padding:12px;background:#fff;position:sticky;top:0;z-index:3;box-shadow:0 2px 10px #0001}.nav-button{border:0;background:transparent;padding:12px 18px;border-radius:10px}.nav-button.active{background:#ede9fe;color:#6d28d9}.section-header,.component-header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.section-header h2{margin-bottom:5px}.section-header p{color:#6b7280}.primary-button,.compute-button{border:0;background:#7c3aed;color:#fff;padding:11px 17px;border-radius:10px}.secondary-button{border:0;background:#e5e7eb;padding:11px 17px;border-radius:10px}.filter-row,.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}.form-grid input,.form-grid select,.filter-row select,.info-card select,.info-card input,.info-card textarea,.info-card>input,.info-card>select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.form-card,.info-card,.component-card,.attendance-summary{background:#fff;border-radius:16px;padding:20px;margin:18px 0;box-shadow:0 5px 20px #0000000b}.form-actions{display:flex;gap:10px}.student-list{display:grid;gap:14px}.student-card,.attendance-student-card,.grade-record,.note-card{background:#fff;border-radius:15px;padding:18px;box-shadow:0 4px 18px #0001}.student-card{display:flex;justify-content:space-between;align-items:center}.student-avatar{font-size:2rem;float:left;margin-right:12px}.student-card h3,.attendance-student-card h3{margin:0 0 5px}.student-tags{display:flex;gap:7px;flex-wrap:wrap}.student-tags span,.weight-badge{background:#ede9fe;color:#6d28d9;padding:4px 9px;border-radius:20px;font-size:.8rem}.student-actions,.record-actions,.attendance-actions{display:flex;gap:8px;flex-wrap:wrap}.edit-button,.delete-button,.attendance-button{border:0;padding:8px 11px;border-radius:9px}.edit-button{background:#e0f2fe}.delete-button{background:#fee2e2;color:#b91c1c}.semester-grid,.subject-grid,.excel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}.subject-grid{grid-template-columns:repeat(3,1fr)}.semester-card,.subject-card,.excel-card{border:0;background:#fff;padding:22px;border-radius:15px;box-shadow:0 5px 20px #0001;display:flex;flex-direction:column;gap:8px}.semester-card:hover,.subject-card:hover,.excel-card:hover{outline:2px solid #8b5cf6}.component-card-header{display:flex;justify-content:space-between;align-items:center}.component-card h3{margin:0}.component-average{padding:10px;background:#f5f3ff;border-radius:10px;margin-bottom:10px}.grade-record{display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;align-items:center;margin:8px 0}.grade-record small,.note-card small{display:block;color:#6b7280;margin-top:4px}.attendance-list{display:grid;gap:12px}.attendance-student-card{display:flex;justify-content:space-between;align-items:center}.present-button{background:#dcfce7}.absent-button{background:#fee2e2}.attendance-button.selected{outline:3px solid #8b5cf6}.attendance-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.attendance-stat{text-align:center;padding:15px;background:#f9fafb;border-radius:12px}.attendance-stat span,.attendance-stat strong,.attendance-stat small{display:block}.attendance-stat strong{font-size:1.5rem}.notes-list{display:grid;gap:12px;margin-top:18px}.daily-note{width:100%;min-height:100px;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin:12px 0}.empty-state{text-align:center;padding:50px;background:#fff;border-radius:16px;color:#6b7280}.empty-icon{font-size:3rem}.attendance-grade-info{background:#ecfdf5;padding:10px;border-radius:10px;color:#166534}.subject-result{background:#fff;border-radius:16px;padding:25px;text-align:center;box-shadow:0 5px 20px #0001;margin-top:20px}.subject-grade-value{font-size:3rem;font-weight:800;color:#7c3aed}.report-card{background:#fff;padding:35px;margin-top:20px;border-radius:15px;box-shadow:0 5px 20px #0001}.report-card table{width:100%;border-collapse:collapse;margin:20px 0}.report-card th,.report-card td{border:1px solid #ddd;padding:10px;text-align:left}.report-attendance{padding:15px;background:#f5f3ff;border-radius:10px}@media print{body{background:#fff}.workspace-header,.workspace-nav,.section-header,.info-card,.primary-button{display:none!important}.report-card{box-shadow:none;margin:0}.report-card button{display:none}}@media(max-width:800px){.workspace-grid,.feature-grid,.subject-grid,.attendance-summary-grid{grid-template-columns:1fr 1fr}.workspace-nav{overflow:auto;justify-content:flex-start}.student-card,.attendance-student-card{align-items:flex-start;gap:15px;flex-direction:column}.grade-record{grid-template-columns:1fr}.filter-row,.form-grid,.semester-grid{grid-template-columns:1fr}}@media(max-width:500px){.feature-grid,.workspace-grid,.subject-grid,.attendance-summary-grid{grid-template-columns:1fr}.workspace-header{padding:18px}.workspace-container{padding:20px 12px}.nav-button span{display:none}}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#f5f3ff,#eef2ff);color:#1f2937}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.header{padding:55px 20px;text-align:center;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}.header h1{margin:0;font-size:2.2rem}.header p{opacity:.9}.container,.workspace-container{max-width:1150px;margin:auto;padding:30px 20px}.welcome{text-align:center;margin-bottom:28px}.workspace-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}.workspace-card{border:0;border-radius:22px;padding:35px;background:#fff;box-shadow:0 10px 30px #0001;text-align:left;transition:.2s}.workspace-card:hover{transform:translateY(-3px)}.workspace-icon{font-size:3rem}.feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.feature-card{background:#fff;padding:22px;border-radius:16px;text-align:center;box-shadow:0 5px 20px #0000000d}.feature-card .icon{font-size:1.8rem}.section-title{text-align:center;margin-top:40px}.footer{text-align:center;padding:25px;color:#6b7280}.workspace-header{display:flex;align-items:center;gap:20px;padding:25px max(20px,calc((100% - 1150px)/2));background:#fff;box-shadow:0 3px 15px #0001}.workspace-header h1{margin:0}.workspace-header p{margin:5px 0;color:#6b7280}.back-button{border:0;background:#f3f4f6;padding:10px 15px;border-radius:10px}.workspace-nav{display:flex;gap:8px;justify-content:center;padding:12px;background:#fff;position:sticky;top:0;z-index:3;box-shadow:0 2px 10px #0001}.nav-button{border:0;background:transparent;padding:12px 18px;border-radius:10px}.nav-button.active{background:#ede9fe;color:#6d28d9}.section-header,.component-header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}.section-header h2{margin-bottom:5px}.section-header p{color:#6b7280}.primary-button,.compute-button{border:0;background:#7c3aed;color:#fff;padding:11px 17px;border-radius:10px}.secondary-button{border:0;background:#e5e7eb;padding:11px 17px;border-radius:10px}.filter-row,.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}.form-grid input,.form-grid select,.filter-row select,.info-card select,.info-card input,.info-card textarea,.info-card>input,.info-card>select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.form-card,.info-card,.component-card,.attendance-summary{background:#fff;border-radius:16px;padding:20px;margin:18px 0;box-shadow:0 5px 20px #0000000b}.form-actions{display:flex;gap:10px}.student-list{display:grid;gap:14px}.student-card,.attendance-student-card,.grade-record,.note-card{background:#fff;border-radius:15px;padding:18px;box-shadow:0 4px 18px #0001}.student-card{display:flex;justify-content:space-between;align-items:center}.student-avatar{font-size:2rem;float:left;margin-right:12px}.student-card h3,.attendance-student-card h3{margin:0 0 5px}.student-tags{display:flex;gap:7px;flex-wrap:wrap}.student-tags span,.weight-badge{background:#ede9fe;color:#6d28d9;padding:4px 9px;border-radius:20px;font-size:.8rem}.student-actions,.record-actions,.attendance-actions{display:flex;gap:8px;flex-wrap:wrap}.edit-button,.delete-button,.attendance-button{border:0;padding:8px 11px;border-radius:9px}.edit-button{background:#e0f2fe}.delete-button{background:#fee2e2;color:#b91c1c}.semester-grid,.subject-grid,.excel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}.subject-grid{grid-template-columns:repeat(3,1fr)}.semester-card,.subject-card,.excel-card{border:0;background:#fff;padding:22px;border-radius:15px;box-shadow:0 5px 20px #0001;display:flex;flex-direction:column;gap:8px}.semester-card:hover,.subject-card:hover,.excel-card:hover{outline:2px solid #8b5cf6}.component-card-header{display:flex;justify-content:space-between;align-items:center}.component-card h3{margin:0}.component-average{padding:10px;background:#f5f3ff;border-radius:10px;margin-bottom:10px}.grade-record{display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;align-items:center;margin:8px 0}.grade-record small,.note-card small{display:block;color:#6b7280;margin-top:4px}.attendance-list{display:grid;gap:12px}.attendance-student-card{display:flex;justify-content:space-between;align-items:center}.present-button{background:#dcfce7}.absent-button{background:#fee2e2}.attendance-button.selected{outline:3px solid #8b5cf6}.attendance-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.attendance-stat{text-align:center;padding:15px;background:#f9fafb;border-radius:12px}.attendance-stat span,.attendance-stat strong,.attendance-stat small{display:block}.attendance-stat strong{font-size:1.5rem}.notes-list{display:grid;gap:12px;margin-top:18px}.daily-note{width:100%;min-height:100px;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin:12px 0}.empty-state{text-align:center;padding:50px;background:#fff;border-radius:16px;color:#6b7280}.empty-icon{font-size:3rem}.attendance-grade-info{background:#ecfdf5;padding:10px;border-radius:10px;color:#166534}.subject-result{background:#fff;border-radius:16px;padding:25px;text-align:center;box-shadow:0 5px 20px #0001;margin-top:20px}.subject-grade-value{font-size:3rem;font-weight:800;color:#7c3aed}.
+/* =========================================
+   PROFESSIONAL REPORT CARD
+   ========================================= */
+
+.report-card{
+  width:100%;
+  max-width:850px;
+  margin:25px auto;
+  padding:45px 50px;
+  background:#fff;
+  border:1px solid #d1d5db;
+  border-radius:4px;
+  box-shadow:0 8px 30px #0001;
+  color:#111827;
+}
+
+.report-card h1{
+  margin:0;
+  text-align:center;
+  font-size:1.8rem;
+  color:#4f46e5;
+}
+
+.report-card h2{
+  text-align:center;
+  margin:8px 0 25px;
+  font-size:1.35rem;
+  color:#1f2937;
+}
+
+.report-card p{
+  margin:8px 0;
+  font-size:.95rem;
+  line-height:1.6;
+}
+
+.report-card table{
+  width:100%;
+  border-collapse:collapse;
+  margin:28px 0;
+}
+
+.report-card th{
+  background:#4f46e5;
+  color:#fff;
+  font-weight:600;
+  padding:12px;
+  border:1px solid #4f46e5;
+  text-align:center;
+}
+
+.report-card td{
+  padding:12px;
+  border:1px solid #d1d5db;
+  text-align:center;
+}
+
+.report-card td:first-child{
+  text-align:left;
+  font-weight:500;
+}
+
+.report-card tbody tr:nth-child(even){
+  background:#f9fafb;
+}
+
+.report-attendance{
+  margin-top:20px;
+  padding:15px 18px;
+  background:#f5f3ff;
+  border:1px solid #ddd6fe;
+  border-radius:10px;
+  font-size:.95rem;
+}
+
+.report-card .primary-button{
+  display:block;
+  margin:25px auto 0;
+}
+
+
+/* =========================================
+   REPORT CARD PRINTING
+   ========================================= */
+
+@media print{
+
+  @page{
+    size:A4;
+    margin:12mm;
+  }
+
+  html,
+  body{
+    background:#fff!important;
+  }
+
+  body{
+    margin:0;
+    padding:0;
+  }
+
+  .workspace-header,
+  .workspace-nav,
+  .section-header,
+  .info-card,
+  .primary-button,
+  .back-button,
+  .footer{
+    display:none!important;
+  }
+
+  .workspace-container,
+  .container{
+    max-width:none;
+    padding:0;
+    margin:0;
+  }
+
+  .report-card{
+    max-width:none;
+    width:100%;
+    margin:0;
+    padding:20px;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+  }
+
+  .report-card h1{
+    font-size:20pt;
+  }
+
+  .report-card h2{
+    font-size:15pt;
+  }
+
+  .report-card p{
+    font-size:10.5pt;
+  }
+
+  .report-card table{
+    margin:20px 0;
+  }
+
+  .report-card th,
+  .report-card td{
+    padding:8px;
+    font-size:10pt;
+  }
+
+  .report-attendance{
+    background:#f5f3ff!important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .report-card button{
+    display:none!important;
+  }
+}
+
+
+/* =========================================
+   MOBILE REPORT CARD
+   ========================================= */
+
+@media(max-width:600px){
+
+  .report-card{
+    padding:25px 18px;
+    margin:15px 0;
+  }
+
+  .report-card h1{
+    font-size:1.4rem;
+  }
+
+  .report-card h2{
+    font-size:1.1rem;
+  }
+
+  .report-card p{
+    font-size:.85rem;
+  }
+
+  .report-card th,
+  .report-card td{
+    padding:8px 6px;
+    font-size:.8rem;
+  }
+
+  .report-attendance{
+    font-size:.85rem;
+  }
+
+}
+@media print{body{background:#fff}.workspace-header,.workspace-nav,.section-header,.info-card,.primary-button{display:none!important}.report-card{box-shadow:none;margin:0}.report-card button{display:none}}@media(max-width:800px){.workspace-grid,.feature-grid,.subject-grid,.attendance-summary-grid{grid-template-columns:1fr 1fr}.workspace-nav{overflow:auto;justify-content:flex-start}.student-card,.attendance-student-card{align-items:flex-start;gap:15px;flex-direction:column}.grade-record{grid-template-columns:1fr}.filter-row,.form-grid,.semester-grid{grid-template-columns:1fr}}@media(max-width:500px){.feature-grid,.workspace-grid,.subject-grid,.attendance-summary-grid{grid-template-columns:1fr}.workspace-header{padding:18px}.workspace-container{padding:20px 12px}.nav-button span{display:none}}
 /* =========================================
    SUPABASE LOGIN PAGE
    ========================================= */
