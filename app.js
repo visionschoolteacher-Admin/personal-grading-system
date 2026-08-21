@@ -1934,36 +1934,22 @@ async function setAttendance(
    ========================================= */
 
 function getSemesterFromDate(date) {
-
   if (!date) {
     return null;
   }
 
-  const month =
-    parseInt(
-      date.substring(5, 7),
-      10
-    );
+  const month = parseInt(date.substring(5, 7), 10);
 
-  if (
-    month >= 8 &&
-    month <= 12
-  ) {
-
+  if (month >= 8 && month <= 12) {
     return "first";
-
   }
 
-  if (
-    month >= 1 &&
-    month <= 5
-  ) {
-
+  if (month >= 1 && month <= 5) {
     return "second";
-
   }
 
   return null;
+}
 
 }
   const semester=
