@@ -2043,20 +2043,19 @@ function countSchoolDays(
 }
 
 
-function getSemesterFromDate(date){
+function getSemesterFromDate(d) {
 
-  if(!date) return null;
+  if (!d) {
+    return null;
+  }
 
-  const month =
-    new Date(date + "T00:00:00").getMonth() + 1;
+  const m = Number(d.slice(5, 7));
 
-  // First Semester: August - December
-  if(month >= 8 && month <= 12){
+  if (m >= 8 && m <= 12) {
     return "first";
   }
 
-  // Second Semester: January - May
-  if(month >= 1 && month <= 5){
+  if (m >= 1 && m <= 5) {
     return "second";
   }
 
