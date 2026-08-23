@@ -603,7 +603,14 @@ async function loadReportStudents() {
   const sel = document.getElementById("reportStudentSelect");
   if (!sel) return;
   const list = (await getAllRecords(STORES.students)).filter(s => s.workspace === currentWorkspace);
-  sel.innerHTML = '<option value="">Select Student</option>' + list.sort((a,b) => a.name.localeCompare(b.name)).map(s => `<option value="${s.id}">${escapeHTML(s.name)} — ${escapeHTML(s.level)}</option>`).join("");
+  sel.innerHTML = '<option value="">Select Student</option>' + list.sort((a,b) => a.name.localeCompare(b.name)).map(s => `<option
+  value="${s.id}"
+  data-academic-year="${escapeHTML(s.academicYear || "")}"
+>
+  ${escapeHTML(s.name)}
+  — ${escapeHTML(s.level)}
+  (${escapeHTML(s.academicYear)})
+</option>
 }
 
 async function generateReportCard() {
