@@ -11,6 +11,10 @@ let selectedSubject = null;
 let selectedComponentIndex = null;
 let editingGradeId = null;
 
+// ============================================
+// GRADING COMPONENTS
+// ============================================
+
 const GRADING_COMPONENTS = {
   English: [
     { name: "Reading (Fluency & Comprehension)", weight: 20 },
@@ -20,6 +24,7 @@ const GRADING_COMPONENTS = {
     { name: "Semestrial Examination", weight: 25 },
     { name: "Attendance", weight: 5 }
   ],
+
   Mathematics: [
     { name: "Written Test & Quizzes", weight: 15 },
     { name: "Performance Tasks / Problem Solving", weight: 20 },
@@ -29,6 +34,7 @@ const GRADING_COMPONENTS = {
     { name: "Semestrial Examination", weight: 25 },
     { name: "Attendance", weight: 5 }
   ],
+
   Science: [
     { name: "Written Test & Quizzes", weight: 15 },
     { name: "Performance Tasks / Experiments", weight: 20 },
@@ -47,9 +53,14 @@ const GRADING_COMPONENTS = {
 async function checkLoginSession() {
   try {
     const { data, error } = await supabaseClient.auth.getSession();
+
     if (error) throw error;
-    if (data.session) showApp();
-    else showLoginPage();
+
+    if (data.session) {
+      showApp();
+    } else {
+      showLoginPage();
+    }
   } catch (error) {
     console.error("Session check failed:", error);
     showLoginPage();
@@ -69,46 +80,78 @@ function showApp() {
 }
 
 async function loginUser(email, password) {
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
   if (error) throw error;
+
   return data;
 }
 
 async function logoutUser() {
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) {
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) throw error;
+
+    currentWorkspace = null;
+    showLoginPage();
+
+  } catch (error) {
     console.error("Logout failed:", error);
     alert("Unable to sign out.");
-    return;
   }
-  currentWorkspace = null;
-  showLoginPage();
 }
 
 function setupLogin() {
   const form = document.getElementById("loginForm");
+
   if (!form) return;
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
-    const email = document.getElementById("loginEmail")?.value.trim();
-    const password = document.getElementById("loginPassword")?.value;
-    const message = document.getElementById("loginMessage");
+
+    const email =
+      document.getElementById("loginEmail")?.value.trim();
+
+    const password =
+      document.getElementById("loginPassword")?.value;
+
+    const message =
+      document.getElementById("loginMessage");
 
     if (!email || !password) {
-      if (message) message.textContent = "Please enter your email and password.";
+      if (message) {
+        message.textContent =
+          "Please enter your email and password.";
+      }
+
       return;
     }
 
-    if (message) message.textContent = "Signing in...";
+    if (message) {
+      message.textContent = "Signing in...";
+    }
 
     try {
       await loginUser(email, password);
-      if (message) message.textContent = "";
+
+      if (message) {
+        message.textContent = "";
+      }
+
       showApp();
+
     } catch (error) {
       console.error("Login failed:", error);
-      if (message) message.textContent = error.message || "Invalid email or password.";
+
+      if (message) {
+        message.textContent =
+          error.message || "Invalid email or password.";
+      }
     }
   });
 }
@@ -119,45 +162,116 @@ function setupLogin() {
 
 function openWorkspace(type) {
   currentWorkspace = type;
-  document.body.classList.remove("wife-theme", "personal-theme");
-  document.body.classList.add(type === "wife" ? "wife-theme" : "personal-theme");
 
-  const dashboard = document.getElementById("dashboardPage");
-  const workspace = document.getElementById("workspacePage");
+  document.body.classList.remove(
+    "wife-theme",
+    "personal-theme"
+  );
+
+  document.body.classList.add(
+    type === "wife"
+      ? "wife-theme"
+      : "personal-theme"
+  );
+
+  const dashboard =
+    document.getElementById("dashboardPage");
+
+  const workspace =
+    document.getElementById("workspacePage");
+
   dashboard?.classList.add("hidden");
   workspace?.classList.remove("hidden");
 
-  const title = document.getElementById("workspaceTitle");
-  const subtitle = document.getElementById("workspaceSubtitle");
-  if (title) title.textContent = type === "wife" ? "👩‍🏫 Wife's Workspace" : "👨‍🏫 My Personal Workspace";
-  if (subtitle) subtitle.textContent = "Student Records & Academic Management";
+  const title =
+    document.getElementById("workspaceTitle");
+
+  const subtitle =
+    document.getElementById("workspaceSubtitle");
+
+  if (title) {
+    title.textContent =
+      type === "wife"
+        ? "👩‍🏫 Wife's Workspace"
+        : "👨‍🏫 My Personal Workspace";
+  }
+
+  if (subtitle) {
+    subtitle.textContent =
+      "Student Records & Academic Management";
+  }
 
   resetRecordsInterface();
+
   showSection("students");
 }
 
 function goHome() {
-  document.body.classList.remove("wife-theme", "personal-theme");
-  document.getElementById("workspacePage")?.classList.add("hidden");
-  document.getElementById("dashboardPage")?.classList.remove("hidden");
+  document.body.classList.remove(
+    "wife-theme",
+    "personal-theme"
+  );
+
+  document.getElementById("workspacePage")
+    ?.classList.add("hidden");
+
+  document.getElementById("dashboardPage")
+    ?.classList.remove("hidden");
+
   currentWorkspace = null;
 }
 
 async function showSection(section) {
-  ["students", "records", "attendance", "notes", "reports", "excel"].forEach(s => {
-    document.getElementById(s + "Section")?.classList.add("hidden");
+  const sections = [
+    "students",
+    "records",
+    "attendance",
+    "notes",
+    "reports",
+    "excel"
+  ];
+
+  sections.forEach(s => {
+    document
+      .getElementById(s + "Section")
+      ?.classList.add("hidden");
   });
-  document.getElementById(section + "Section")?.classList.remove("hidden");
 
-  document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
-  const i = ["students", "records", "attendance", "notes", "reports", "excel"].indexOf(section);
-  document.querySelectorAll(".nav-button")[i]?.classList.add("active");
+  document
+    .getElementById(section + "Section")
+    ?.classList.remove("hidden");
 
-  if (section === "students") await loadStudents();
-  if (section === "records") await loadGradeStudents();
-  if (section === "attendance") await initializeAttendance();
-  if (section === "notes") await initializeNotes();
-  if (section === "reports") await loadReportStudents();
+  document
+    .querySelectorAll(".nav-button")
+    .forEach(button =>
+      button.classList.remove("active")
+    );
+
+  const index = sections.indexOf(section);
+
+  document
+    .querySelectorAll(".nav-button")[index]
+    ?.classList.add("active");
+
+  if (section === "students") {
+    await loadStudents();
+  }
+
+  if (section === "records") {
+    await loadGradeStudents();
+  }
+
+  if (section === "attendance") {
+    await initializeAttendance();
+  }
+
+  if (section === "notes") {
+    await initializeNotes();
+  }
+
+  if (section === "reports") {
+    await loadReportStudents();
+  }
 }
 
 // ============================================
@@ -166,107 +280,280 @@ async function showSection(section) {
 
 function showStudentForm() {
   editingStudentId = null;
-  document.querySelector("#studentForm h3")?.replaceChildren(document.createTextNode("Add Student"));
+
+  const heading =
+    document.querySelector("#studentForm h3");
+
+  if (heading) {
+    heading.textContent = "Add Student";
+  }
+
   document.getElementById("studentId").value = "";
   document.getElementById("studentName").value = "";
   document.getElementById("studentSection").value = "";
-  document.getElementById("studentForm")?.classList.remove("hidden");
+
+  document
+    .getElementById("studentForm")
+    ?.classList.remove("hidden");
 }
 
 function hideStudentForm() {
   editingStudentId = null;
-  document.getElementById("studentForm")?.classList.add("hidden");
+
+  document
+    .getElementById("studentForm")
+    ?.classList.add("hidden");
 }
 
 async function saveStudent() {
-  const sid = document.getElementById("studentId")?.value.trim();
-  const name = document.getElementById("studentName")?.value.trim();
-  const section = document.getElementById("studentSection")?.value.trim();
-  const year = document.getElementById("academicYearSelect")?.value;
-  const level = document.getElementById("levelSelect")?.value;
+  const sid =
+    document.getElementById("studentId")
+      ?.value.trim();
 
-  if (!sid || !name || !year || !level) return alert("Please complete Student ID, Name, Academic Year and Level.");
+  const name =
+    document.getElementById("studentName")
+      ?.value.trim();
 
-  const all = await getAllRecords(STORES.students);
+  const section =
+    document.getElementById("studentSection")
+      ?.value.trim();
+
+  const year =
+    document.getElementById("academicYearSelect")
+      ?.value;
+
+  const level =
+    document.getElementById("levelSelect")
+      ?.value;
+
+  if (!sid || !name || !year || !level) {
+    return alert(
+      "Please complete Student ID, Name, Academic Year and Level."
+    );
+  }
+
+  const all =
+    await getAllRecords(STORES.students);
 
   if (editingStudentId !== null) {
-    const s = await getRecord(STORES.students, editingStudentId);
-    if (!s) return;
-    Object.assign(s, { studentId: sid, name, section, academicYear: year, level, workspace: currentWorkspace, updatedAt: new Date().toISOString() });
-    await updateRecord(STORES.students, s);
+
+    const student =
+      await getRecord(
+        STORES.students,
+        editingStudentId
+      );
+
+    if (!student) return;
+
+    Object.assign(student, {
+      studentId: sid,
+      name,
+      section,
+      academicYear: year,
+      level,
+      workspace: currentWorkspace,
+      updatedAt: new Date().toISOString()
+    });
+
+    await updateRecord(
+      STORES.students,
+      student
+    );
+
     alert("Student updated successfully.");
+
   } else {
-    if (all.some(s => s.studentId === sid && s.workspace === currentWorkspace && s.academicYear === year)) {
-      return alert("A student with this ID already exists.");
+
+    const duplicate = all.some(student =>
+      student.studentId === sid &&
+      student.workspace === currentWorkspace &&
+      student.academicYear === year
+    );
+
+    if (duplicate) {
+      return alert(
+        "A student with this ID already exists."
+      );
     }
-    await addRecord(STORES.students, { studentId: sid, name, section, academicYear: year, level, workspace: currentWorkspace, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+
+    await addRecord(
+      STORES.students,
+      {
+        studentId: sid,
+        name,
+        section,
+        academicYear: year,
+        level,
+        workspace: currentWorkspace,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    );
+
     alert("Student added successfully.");
   }
 
   hideStudentForm();
+
   await loadStudents();
 }
 
 async function loadStudents() {
   if (!currentWorkspace) return;
-  const all = await getAllRecords(STORES.students);
-  const year = document.getElementById("academicYearSelect")?.value;
-  const list = all.filter(s => s.workspace === currentWorkspace && (!year || s.academicYear === year));
+
+  const all =
+    await getAllRecords(STORES.students);
+
+  const year =
+    document.getElementById("academicYearSelect")
+      ?.value;
+
+  const list = all.filter(student =>
+    student.workspace === currentWorkspace &&
+    (!year || student.academicYear === year)
+  );
+
   renderStudents(list);
+
   await loadGradeStudents();
   await loadNoteStudents();
   await loadReportStudents();
 }
 
 function renderStudents(list) {
-  const c = document.getElementById("studentList");
-  if (!c) return;
+  const container =
+    document.getElementById("studentList");
+
+  if (!container) return;
+
   if (!list.length) {
-    c.className = "empty-state";
-    c.innerHTML = '<div class="empty-icon">👨‍🎓</div><h3>No students found</h3><p>Add students or select another academic year.</p>';
+
+    container.className = "empty-state";
+
+    container.innerHTML = `
+      <div class="empty-icon">👨‍🎓</div>
+      <h3>No students found</h3>
+      <p>Add students or select another academic year.</p>
+    `;
+
     return;
   }
-  c.className = "student-list";
-  list.sort((a, b) => a.name.localeCompare(b.name));
-  c.innerHTML = list.map(s => `
+
+  container.className = "student-list";
+
+  list.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  container.innerHTML = list.map(student => `
     <div class="student-card">
+
       <div class="student-info">
-        <div class="student-avatar">👨‍🎓</div>
-        <div>
-          <h3>${escapeHTML(s.name)}</h3>
-          <p>ID: ${escapeHTML(s.studentId)}</p>
-          <div class="student-tags">
-            <span>${escapeHTML(s.level)}</span>
-            <span>${escapeHTML(s.academicYear)}</span>
-            ${s.section ? `<span>${escapeHTML(s.section)}</span>` : ""}
-          </div>
+
+        <div class="student-avatar">
+          👨‍🎓
         </div>
+
+        <div>
+
+          <h3>
+            ${escapeHTML(student.name)}
+          </h3>
+
+          <p>
+            ID: ${escapeHTML(student.studentId)}
+          </p>
+
+          <div class="student-tags">
+
+            <span>
+              ${escapeHTML(student.level)}
+            </span>
+
+            <span>
+              ${escapeHTML(student.academicYear)}
+            </span>
+
+            ${
+              student.section
+                ? `<span>${escapeHTML(student.section)}</span>`
+                : ""
+            }
+
+          </div>
+
+        </div>
+
       </div>
+
       <div class="student-actions">
-        <button class="edit-button" onclick="editStudent(${s.id})">✏️ Edit</button>
-        <button class="delete-button" onclick="removeStudent(${s.id})">🗑️ Remove</button>
+
+        <button
+          class="edit-button"
+          onclick="editStudent(${student.id})">
+          ✏️ Edit
+        </button>
+
+        <button
+          class="delete-button"
+          onclick="removeStudent(${student.id})">
+          🗑️ Remove
+        </button>
+
       </div>
-    </div>`).join("");
+
+    </div>
+  `).join("");
 }
 
 async function editStudent(id) {
-  const s = await getRecord(STORES.students, id);
-  if (!s) return;
+  const student =
+    await getRecord(STORES.students, id);
+
+  if (!student) return;
+
   editingStudentId = id;
-  const h = document.querySelector("#studentForm h3");
-  if (h) h.textContent = "Update Student";
-  document.getElementById("studentId").value = s.studentId || "";
-  document.getElementById("studentName").value = s.name || "";
-  document.getElementById("studentSection").value = s.section || "";
-  document.getElementById("academicYearSelect").value = s.academicYear || "";
-  document.getElementById("levelSelect").value = s.level || "";
-  document.getElementById("studentForm")?.classList.remove("hidden");
+
+  const heading =
+    document.querySelector("#studentForm h3");
+
+  if (heading) {
+    heading.textContent = "Update Student";
+  }
+
+  document.getElementById("studentId").value =
+    student.studentId || "";
+
+  document.getElementById("studentName").value =
+    student.name || "";
+
+  document.getElementById("studentSection").value =
+    student.section || "";
+
+  document.getElementById("academicYearSelect").value =
+    student.academicYear || "";
+
+  document.getElementById("levelSelect").value =
+    student.level || "";
+
+  document
+    .getElementById("studentForm")
+    ?.classList.remove("hidden");
 }
 
 async function removeStudent(id) {
-  const s = await getRecord(STORES.students, id);
-  if (s && confirm(`Remove ${s.name}?`)) {
-    await deleteRecord(STORES.students, id);
+  const student =
+    await getRecord(STORES.students, id);
+
+  if (!student) return;
+
+  if (confirm(`Remove ${student.name}?`)) {
+
+    await deleteRecord(
+      STORES.students,
+      id
+    );
+
     await loadStudents();
   }
 }
@@ -276,143 +563,667 @@ async function removeStudent(id) {
 // ============================================
 
 async function loadGradeStudents() {
-  const sel = document.getElementById("gradeStudentSelect");
-  if (!sel) return;
-  const all = await getAllRecords(STORES.students);
-  const list = all.filter(s => s.workspace === currentWorkspace);
-  sel.innerHTML = '<option value="">Select Student</option>' + list.sort((a,b) => a.name.localeCompare(b.name)).map(s => `<option value="${s.id}" data-academic-year="${escapeHTML(s.academicYear)}">${escapeHTML(s.name)} — ${escapeHTML(s.level)} (${escapeHTML(s.academicYear)})</option>`).join("");
+  const select =
+    document.getElementById("gradeStudentSelect");
+
+  if (!select) return;
+
+  const all =
+    await getAllRecords(STORES.students);
+
+  const list = all.filter(student =>
+    student.workspace === currentWorkspace
+  );
+
+  list.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  select.innerHTML =
+    '<option value="">Select Student</option>' +
+    list.map(student => `
+      <option
+        value="${student.id}"
+        data-academic-year="${escapeHTML(student.academicYear || "")}">
+        ${escapeHTML(student.name)}
+        — ${escapeHTML(student.level)}
+        (${escapeHTML(student.academicYear)})
+      </option>
+    `).join("");
 }
 
 function resetGradeView() {
   selectedSemester = null;
   selectedSubject = null;
   selectedComponentIndex = null;
-  document.getElementById("subjectArea")?.classList.add("hidden");
-  document.getElementById("componentArea")?.classList.add("hidden");
-  document.getElementById("subjectResult")?.classList.add("hidden");
+  editingGradeId = null;
+
+  document
+    .getElementById("subjectArea")
+    ?.classList.add("hidden");
+
+  document
+    .getElementById("componentArea")
+    ?.classList.add("hidden");
+
+  document
+    .getElementById("subjectResult")
+    ?.classList.add("hidden");
 }
 
-function selectSemester(s) {
-  if (!document.getElementById("gradeStudentSelect")?.value) return alert("Please select a student first.");
-  selectedSemester = s;
+function selectSemester(semester) {
+
+  if (
+    !document
+      .getElementById("gradeStudentSelect")
+      ?.value
+  ) {
+    return alert(
+      "Please select a student first."
+    );
+  }
+
+  selectedSemester = semester;
   selectedSubject = null;
   selectedComponentIndex = null;
-  document.getElementById("subjectArea")?.classList.remove("hidden");
-  document.getElementById("componentArea")?.classList.add("hidden");
+
+  document
+    .getElementById("subjectArea")
+    ?.classList.remove("hidden");
+
+  document
+    .getElementById("componentArea")
+    ?.classList.add("hidden");
 }
 
-async function selectSubject(s) {
-  if (!selectedSemester) return alert("Please select a semester first.");
-  selectedSubject = s;
+async function selectSubject(subject) {
+
+  if (!selectedSemester) {
+    return alert(
+      "Please select a semester first."
+    );
+  }
+
+  selectedSubject = subject;
   selectedComponentIndex = null;
-  document.getElementById("componentArea")?.classList.remove("hidden");
-  document.getElementById("subjectArea")?.classList.remove("hidden");
-  const title = document.getElementById("selectedSubjectTitle");
-  const semTitle = document.getElementById("selectedSemesterTitle");
-  if (title) title.textContent = s;
-  if (semTitle) semTitle.textContent = selectedSemester === "first" ? "First Semester — August to December" : "Second Semester — January to May";
-  document.getElementById("subjectResult")?.classList.add("hidden");
+
+  document
+    .getElementById("componentArea")
+    ?.classList.remove("hidden");
+
+  document
+    .getElementById("subjectArea")
+    ?.classList.remove("hidden");
+
+  const title =
+    document.getElementById("selectedSubjectTitle");
+
+  const semesterTitle =
+    document.getElementById("selectedSemesterTitle");
+
+  if (title) {
+    title.textContent = subject;
+  }
+
+  if (semesterTitle) {
+    semesterTitle.textContent =
+      selectedSemester === "first"
+        ? "First Semester — August to December"
+        : "Second Semester — January to May";
+  }
+
+  document
+    .getElementById("subjectResult")
+    ?.classList.add("hidden");
+
   await renderGradingComponents();
 }
 
 async function renderGradingComponents() {
-  const box = document.getElementById("gradingComponents");
+
+  const box =
+    document.getElementById("gradingComponents");
+
   if (!box) return;
-  const comps = GRADING_COMPONENTS[selectedSubject] || [];
-  box.innerHTML = comps.map((c, i) => `<div class="component-card"><div class="component-card-header"><h3>${escapeHTML(c.name)}</h3><span class="weight-badge">${c.weight}%</span></div><div id="componentRecords-${i}" class="component-records"></div>${c.name === "Attendance" ? '<div class="attendance-grade-info">Attendance is calculated automatically from attendance records.</div>' : `<button class="add-record-button" onclick="openGradeRecordForm(${i})">+ Add Record</button>`}</div>`).join("");
-  for (let i = 0; i < comps.length; i++) await renderComponentRecords(i);
+
+  const components =
+    GRADING_COMPONENTS[selectedSubject] || [];
+
+  box.innerHTML = components.map(
+    (component, index) => `
+      <div class="component-card">
+
+        <div class="component-card-header">
+
+          <h3>
+            ${escapeHTML(component.name)}
+          </h3>
+
+          <span class="weight-badge">
+            ${component.weight}%
+          </span>
+
+        </div>
+
+        <div
+          id="componentRecords-${index}"
+          class="component-records">
+        </div>
+
+        ${
+          component.name === "Attendance"
+
+            ? `
+              <div class="attendance-grade-info">
+                Attendance is calculated automatically
+                from attendance records.
+              </div>
+            `
+
+            : `
+              <button
+                class="add-record-button"
+                onclick="openGradeRecordForm(${index})">
+                + Add Record
+              </button>
+            `
+        }
+
+      </div>
+    `
+  ).join("");
+
+  for (
+    let i = 0;
+    i < components.length;
+    i++
+  ) {
+    await renderComponentRecords(i);
+  }
 }
 
-function openGradeRecordForm(index) {
-  const sel = document.getElementById("gradeStudentSelect");
-  if (!sel?.value) return alert("Please select a student first.");
+function openGradeRecordForm(
+  index,
+  preserveEditing = false
+) {
+  const select =
+    document.getElementById("gradeStudentSelect");
+
+  if (!select?.value) {
+    return alert(
+      "Please select a student first."
+    );
+  }
+
   selectedComponentIndex = index;
-  editingGradeId = null;
+
+  if (!preserveEditing) {
+    editingGradeId = null;
+  }
+
   closeGradeRecordForm();
-  const c = GRADING_COMPONENTS[selectedSubject][index];
-  const form = document.createElement("div");
+
+  const component =
+    GRADING_COMPONENTS[selectedSubject][index];
+
+  const form =
+    document.createElement("div");
+
   form.id = "gradeRecordForm";
   form.className = "form-card";
-  form.innerHTML = `<h3>Add Grade Record</h3><p>${escapeHTML(c.name)} — ${c.weight}%</p><div class="form-grid"><input id="gradeRecordName" placeholder="Record / Activity Name"><input type="date" id="gradeRecordDate" value="${getTodayDate()}"><input type="number" id="gradeScore" placeholder="Score Obtained" min="0" step=".01"><input type="number" id="gradeTotal" placeholder="Total Score" min=".01" step=".01"></div><textarea id="gradeNotes" class="daily-note" placeholder="Optional notes"></textarea><div class="form-actions"><button class="primary-button" onclick="saveGradeRecord()">Save Record</button><button class="secondary-button" onclick="closeGradeRecordForm()">Cancel</button></div>`;
-  document.getElementById("componentArea")?.appendChild(form);
+
+  form.innerHTML = `
+    <h3>
+      ${editingGradeId
+        ? "Edit Grade Record"
+        : "Add Grade Record"}
+    </h3>
+
+    <p>
+      ${escapeHTML(component.name)}
+      — ${component.weight}%
+    </p>
+
+    <div class="form-grid">
+
+      <input
+        id="gradeRecordName"
+        placeholder="Record / Activity Name">
+
+      <input
+        type="date"
+        id="gradeRecordDate"
+        value="${getTodayDate()}">
+
+      <input
+        type="number"
+        id="gradeScore"
+        placeholder="Score Obtained"
+        min="0"
+        step=".01">
+
+      <input
+        type="number"
+        id="gradeTotal"
+        placeholder="Total Score"
+        min=".01"
+        step=".01">
+
+    </div>
+
+    <textarea
+      id="gradeNotes"
+      class="daily-note"
+      placeholder="Optional notes">
+    </textarea>
+
+    <div class="form-actions">
+
+      <button
+        class="primary-button"
+        onclick="saveGradeRecord()">
+        Save Record
+      </button>
+
+      <button
+        class="secondary-button"
+        onclick="closeGradeRecordForm()">
+        Cancel
+      </button>
+
+    </div>
+  `;
+
+  document
+    .getElementById("componentArea")
+    ?.appendChild(form);
 }
 
-function closeGradeRecordForm() { document.getElementById("gradeRecordForm")?.remove(); }
+function closeGradeRecordForm() {
+  document
+    .getElementById("gradeRecordForm")
+    ?.remove();
+}
 
 async function saveGradeRecord() {
-  const studentId = Number(document.getElementById("gradeStudentSelect")?.value);
-  const name = document.getElementById("gradeRecordName")?.value.trim();
-  const date = document.getElementById("gradeRecordDate")?.value;
-  const score = Number(document.getElementById("gradeScore")?.value);
-  const total = Number(document.getElementById("gradeTotal")?.value);
-  const notes = document.getElementById("gradeNotes")?.value.trim();
 
-  if (!studentId || !name || !date || !Number.isFinite(score) || !Number.isFinite(total) || total <= 0) return alert("Please complete the record.");
-  if (score > total) return alert("Score cannot be greater than total.");
+  const studentId =
+    Number(
+      document
+        .getElementById("gradeStudentSelect")
+        ?.value
+    );
 
-  const c = GRADING_COMPONENTS[selectedSubject][selectedComponentIndex];
-  const student = await getRecord(STORES.students, studentId);
-  const now = new Date().toISOString();
-  const r = { studentId, workspace: currentWorkspace, academicYear: student?.academicYear || "", semester: selectedSemester, subject: selectedSubject, component: c.name, componentWeight: c.weight, recordName: name, date, score, total, percentage: score / total * 100, notes, updatedAt: now };
+  const name =
+    document
+      .getElementById("gradeRecordName")
+      ?.value.trim();
+
+  const date =
+    document
+      .getElementById("gradeRecordDate")
+      ?.value;
+
+  const score =
+    Number(
+      document
+        .getElementById("gradeScore")
+        ?.value
+    );
+
+  const total =
+    Number(
+      document
+        .getElementById("gradeTotal")
+        ?.value
+    );
+
+  const notes =
+    document
+      .getElementById("gradeNotes")
+      ?.value.trim();
+
+  if (
+    !studentId ||
+    !name ||
+    !date ||
+    !Number.isFinite(score) ||
+    !Number.isFinite(total) ||
+    total <= 0
+  ) {
+    return alert(
+      "Please complete the record."
+    );
+  }
+
+  if (score < 0) {
+    return alert(
+      "Score cannot be negative."
+    );
+  }
+
+  if (score > total) {
+    return alert(
+      "Score cannot be greater than total."
+    );
+  }
+
+  const component =
+    GRADING_COMPONENTS[selectedSubject]
+      [selectedComponentIndex];
+
+  const student =
+    await getRecord(
+      STORES.students,
+      studentId
+    );
+
+  const now =
+    new Date().toISOString();
+
+  const record = {
+    studentId,
+    workspace: currentWorkspace,
+    academicYear:
+      student?.academicYear || "",
+    semester: selectedSemester,
+    subject: selectedSubject,
+    component: component.name,
+    componentWeight: component.weight,
+    recordName: name,
+    date,
+    score,
+    total,
+    percentage:
+      score / total * 100,
+    notes,
+    updatedAt: now
+  };
 
   if (editingGradeId) {
-    r.id = editingGradeId;
-    const old = await getRecord(STORES.grades, editingGradeId);
-    r.createdAt = old?.createdAt || now;
-    await updateRecord(STORES.grades, r);
+
+    record.id = editingGradeId;
+
+    const old =
+      await getRecord(
+        STORES.grades,
+        editingGradeId
+      );
+
+    record.createdAt =
+      old?.createdAt || now;
+
+    await updateRecord(
+      STORES.grades,
+      record
+    );
+
   } else {
-    r.createdAt = now;
-    await addRecord(STORES.grades, r);
+
+    record.createdAt = now;
+
+    await addRecord(
+      STORES.grades,
+      record
+    );
   }
+
   closeGradeRecordForm();
+
+  editingGradeId = null;
+
   await renderGradingComponents();
-  alert("Grade record saved successfully.");
+
+  alert(
+    "Grade record saved successfully."
+  );
 }
 
 async function renderComponentRecords(index) {
-  const container = document.getElementById(`componentRecords-${index}`);
-  const sid = Number(document.getElementById("gradeStudentSelect")?.value);
-  if (!container || !sid) return;
-  const c = GRADING_COMPONENTS[selectedSubject][index];
-  const year = await getStudentAcademicYear(sid);
 
-  if (c.name === "Attendance") {
-    const a = await getAttendancePercentageForStudent(sid, year, selectedSemester);
-    container.innerHTML = `<div class="component-average"><strong>Attendance:</strong> ${a.percentage.toFixed(2)}% &nbsp; <strong>Weighted:</strong> ${a.weighted.toFixed(2)}%<br><small>${a.present} Present / ${a.absent} Absent / ${a.total} Marked</small></div>`;
+  const container =
+    document.getElementById(
+      `componentRecords-${index}`
+    );
+
+  const studentId =
+    Number(
+      document
+        .getElementById("gradeStudentSelect")
+        ?.value
+    );
+
+  if (!container || !studentId) return;
+
+  const component =
+    GRADING_COMPONENTS[selectedSubject][index];
+
+  const year =
+    await getStudentAcademicYear(studentId);
+
+  if (component.name === "Attendance") {
+
+    const attendance =
+      await getAttendancePercentageForStudent(
+        studentId,
+        year,
+        selectedSemester
+      );
+
+    container.innerHTML = `
+      <div class="component-average">
+
+        <strong>
+          Attendance:
+        </strong>
+
+        ${attendance.percentage.toFixed(2)}%
+
+        &nbsp;
+
+        <strong>
+          Weighted:
+        </strong>
+
+        ${attendance.weighted.toFixed(2)}%
+
+        <br>
+
+        <small>
+          ${attendance.present} Present /
+          ${attendance.absent} Absent /
+          ${attendance.total} Marked
+        </small>
+
+      </div>
+    `;
+
     return;
   }
 
-  const grades = await getAllRecords(STORES.grades);
-  const records = grades.filter(r => r.studentId === sid && r.workspace === currentWorkspace && r.academicYear === year && r.semester === selectedSemester && r.subject === selectedSubject && r.component === c.name);
+  const grades =
+    await getAllRecords(STORES.grades);
+
+  const records =
+    grades.filter(record =>
+      record.studentId === studentId &&
+      record.workspace === currentWorkspace &&
+      record.academicYear === year &&
+      record.semester === selectedSemester &&
+      record.subject === selectedSubject &&
+      record.component === component.name
+    );
+
   if (!records.length) {
-    container.innerHTML = '<div class="component-empty">No records yet.</div>';
+
+    container.innerHTML =
+      '<div class="component-empty">No records yet.</div>';
+
     return;
   }
-  const avg = records.reduce((x,r) => x + Number(r.percentage), 0) / records.length;
-  container.innerHTML = `<div class="component-average"><strong>Average:</strong> ${avg.toFixed(2)}% &nbsp; <strong>Weighted:</strong> ${(avg*c.weight/100).toFixed(2)}%</div>` + records.map(r => `<div class="grade-record"><div><strong>${escapeHTML(r.recordName)}</strong><small>${r.date}</small></div><strong>${formatNumber(r.score)}/${formatNumber(r.total)} (${Number(r.percentage).toFixed(2)}%)</strong><div class="record-actions"><button class="edit-button" onclick="editGradeRecord(${r.id})">✏️ Edit</button><button class="delete-button" onclick="removeGradeRecord(${r.id})">🗑️ Remove</button></div></div>`).join("");
+
+  const average =
+    records.reduce(
+      (sum, record) =>
+        sum + Number(record.percentage),
+      0
+    ) / records.length;
+
+  const weighted =
+    average * component.weight / 100;
+
+  container.innerHTML = `
+    <div class="component-average">
+
+      <strong>
+        Average:
+      </strong>
+
+      ${average.toFixed(2)}%
+
+      &nbsp;
+
+      <strong>
+        Weighted:
+      </strong>
+
+      ${weighted.toFixed(2)}%
+
+    </div>
+
+    ${
+      records.map(record => `
+        <div class="grade-record">
+
+          <div>
+
+            <strong>
+              ${escapeHTML(record.recordName)}
+            </strong>
+
+            <small>
+              ${record.date}
+            </small>
+
+          </div>
+
+          <strong>
+            ${formatNumber(record.score)}
+            /
+            ${formatNumber(record.total)}
+            (${Number(record.percentage).toFixed(2)}%)
+          </strong>
+
+          <div class="record-actions">
+
+            <button
+              class="edit-button"
+              onclick="editGradeRecord(${record.id})">
+              ✏️ Edit
+            </button>
+
+            <button
+              class="delete-button"
+              onclick="removeGradeRecord(${record.id})">
+              🗑️ Remove
+            </button>
+
+          </div>
+
+        </div>
+      `).join("")
+    }
+  `;
 }
 
 async function editGradeRecord(id) {
-  const r = await getRecord(STORES.grades, id);
-  if (!r) return;
-  document.getElementById("gradeStudentSelect").value = r.studentId;
-  selectedSemester = r.semester;
-  selectedSubject = r.subject;
-  selectedComponentIndex = (GRADING_COMPONENTS[r.subject] || []).findIndex(c => c.name === r.component);
+
+  const record =
+    await getRecord(
+      STORES.grades,
+      id
+    );
+
+  if (!record) return;
+
+  document
+    .getElementById("gradeStudentSelect")
+    .value = record.studentId;
+
+  selectedSemester =
+    record.semester;
+
+  selectedSubject =
+    record.subject;
+
+  selectedComponentIndex =
+    (
+      GRADING_COMPONENTS[record.subject] || []
+    ).findIndex(
+      component =>
+        component.name === record.component
+    );
+
   editingGradeId = id;
-  await selectSubject(r.subject);
-  openGradeRecordForm(selectedComponentIndex);
-  document.querySelector("#gradeRecordForm h3").textContent = "Edit Grade Record";
-  document.getElementById("gradeRecordName").value = r.recordName || "";
-  document.getElementById("gradeRecordDate").value = r.date || "";
-  document.getElementById("gradeScore").value = r.score ?? "";
-  document.getElementById("gradeTotal").value = r.total ?? "";
-  document.getElementById("gradeNotes").value = r.notes || "";
+
+  await selectSubject(
+    record.subject
+  );
+
+  openGradeRecordForm(
+    selectedComponentIndex,
+    true
+  );
+
+  const heading =
+    document.querySelector(
+      "#gradeRecordForm h3"
+    );
+
+  if (heading) {
+    heading.textContent =
+      "Edit Grade Record";
+  }
+
+  document.getElementById(
+    "gradeRecordName"
+  ).value =
+    record.recordName || "";
+
+  document.getElementById(
+    "gradeRecordDate"
+  ).value =
+    record.date || "";
+
+  document.getElementById(
+    "gradeScore"
+  ).value =
+    record.score ?? "";
+
+  document.getElementById(
+    "gradeTotal"
+  ).value =
+    record.total ?? "";
+
+  document.getElementById(
+    "gradeNotes"
+  ).value =
+    record.notes || "";
 }
 
 async function removeGradeRecord(id) {
-  if (confirm("Remove this grade record?")) {
-    await deleteRecord(STORES.grades, id);
+
+  if (
+    confirm(
+      "Remove this grade record?"
+    )
+  ) {
+
+    await deleteRecord(
+      STORES.grades,
+      id
+    );
+
     await renderGradingComponents();
   }
 }
@@ -422,103 +1233,509 @@ async function removeGradeRecord(id) {
 // ============================================
 
 function getSemesterFromDate(date) {
-  if (!date || typeof date !== "string") return null;
-  const month = parseInt(date.substring(5, 7), 10);
-  if (month >= 8 && month <= 12) return "first";
-  if (month >= 1 && month <= 5) return "second";
+
+  if (
+    !date ||
+    typeof date !== "string"
+  ) {
+    return null;
+  }
+
+  const month =
+    parseInt(
+      date.substring(5, 7),
+      10
+    );
+
+  if (
+    month >= 8 &&
+    month <= 12
+  ) {
+    return "first";
+  }
+
+  if (
+    month >= 1 &&
+    month <= 5
+  ) {
+    return "second";
+  }
+
   return null;
 }
 
-async function getAttendancePercentageForStudent(studentId, year, semester) {
-  const all = await getAllRecords(STORES.attendance);
-  const records = all.filter(a => a.studentId === studentId && a.workspace === currentWorkspace && a.academicYear === year && (!semester || a.semester === semester));
-  const present = records.filter(a => a.status === "present").length;
-  const absent = records.filter(a => a.status === "absent").length;
-  const total = present + absent;
-  const percentage = total ? present / total * 100 : 0;
-  return { present, absent, total, percentage, weighted: percentage * 0.05 };
+async function getAttendancePercentageForStudent(
+  studentId,
+  year,
+  semester
+) {
+
+  const all =
+    await getAllRecords(
+      STORES.attendance
+    );
+
+  const records =
+    all.filter(attendance =>
+      attendance.studentId === studentId &&
+      attendance.workspace === currentWorkspace &&
+      attendance.academicYear === year &&
+      (
+        !semester ||
+        attendance.semester === semester
+      )
+    );
+
+  const present =
+    records.filter(
+      attendance =>
+        attendance.status === "present"
+    ).length;
+
+  const absent =
+    records.filter(
+      attendance =>
+        attendance.status === "absent"
+    ).length;
+
+  const total =
+    present + absent;
+
+  const percentage =
+    total
+      ? present / total * 100
+      : 0;
+
+  return {
+    present,
+    absent,
+    total,
+    percentage,
+    weighted:
+      percentage * 0.05
+  };
 }
 
 async function initializeAttendance() {
-  const dateEl = document.getElementById("attendanceDate");
-  const yearEl = document.getElementById("attendanceAcademicYear");
-  if (dateEl && !dateEl.value) dateEl.value = getTodayDate();
-  if (yearEl && !yearEl.value) yearEl.value = document.getElementById("academicYearSelect")?.value || getAcademicYearFromToday();
-  if (yearEl) yearEl.onchange = loadAttendance;
-  if (dateEl) dateEl.onchange = loadAttendance;
+
+  const date =
+    document.getElementById(
+      "attendanceDate"
+    );
+
+  const year =
+    document.getElementById(
+      "attendanceAcademicYear"
+    );
+
+  if (
+    date &&
+    !date.value
+  ) {
+    date.value =
+      getTodayDate();
+  }
+
+  if (
+    year &&
+    !year.value
+  ) {
+    year.value =
+      document.getElementById(
+        "academicYearSelect"
+      )?.value ||
+      getAcademicYearFromToday();
+  }
+
+  if (year) {
+    year.onchange =
+      loadAttendance;
+  }
+
+  if (date) {
+    date.onchange =
+      loadAttendance;
+  }
+
   await loadAttendance();
 }
 
 async function loadAttendance() {
-  const year = document.getElementById("attendanceAcademicYear")?.value;
-  const date = document.getElementById("attendanceDate")?.value;
-  const c = document.getElementById("attendanceStudentList");
-  if (!c) return;
-  if (!year || !date) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><h3>Select academic year and date</h3></div>'; return; }
 
-  const students = (await getAllRecords(STORES.students)).filter(s => s.workspace === currentWorkspace && s.academicYear === year);
-  const att = await getAllRecords(STORES.attendance);
-  if (!students.length) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">👨‍🎓</div><h3>No students found</h3></div>'; return; }
+  const year =
+    document.getElementById(
+      "attendanceAcademicYear"
+    )?.value;
 
-  c.innerHTML = students.sort((a,b) => a.name.localeCompare(b.name)).map(s => {
-    const r = att.find(a => a.studentId === s.id && a.workspace === currentWorkspace && a.academicYear === year && a.date === date);
-    return `<div class="attendance-student-card"><div class="attendance-student-info"><div class="student-avatar">👨‍🎓</div><div><h3>${escapeHTML(s.name)}</h3><p>${escapeHTML(s.level)}${s.section ? " • " + escapeHTML(s.section) : ""}</p></div></div><div class="attendance-actions"><button class="attendance-button present-button ${r?.status === "present" ? "selected" : ""}" onclick="setAttendance(${s.id},'present')">🟢 Present</button><button class="attendance-button absent-button ${r?.status === "absent" ? "selected" : ""}" onclick="setAttendance(${s.id},'absent')">🔴 Absent</button></div></div>`;
-  }).join("");
-  await updateAttendanceSummary(year, date);
+  const date =
+    document.getElementById(
+      "attendanceDate"
+    )?.value;
+
+  const container =
+    document.getElementById(
+      "attendanceStudentList"
+    );
+
+  if (!container) return;
+
+  if (!year || !date) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          📅
+        </div>
+
+        <h3>
+          Select academic year and date
+        </h3>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  const students =
+    (
+      await getAllRecords(
+        STORES.students
+      )
+    ).filter(student =>
+      student.workspace === currentWorkspace &&
+      student.academicYear === year
+    );
+
+  const attendance =
+    await getAllRecords(
+      STORES.attendance
+    );
+
+  if (!students.length) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          👨‍🎓
+        </div>
+
+        <h3>
+          No students found
+        </h3>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  students.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  container.innerHTML =
+    students.map(student => {
+
+      const record =
+        attendance.find(att =>
+          att.studentId === student.id &&
+          att.workspace === currentWorkspace &&
+          att.academicYear === year &&
+          att.date === date
+        );
+
+      return `
+        <div class="attendance-student-card">
+
+          <div class="attendance-student-info">
+
+            <div class="student-avatar">
+              👨‍🎓
+            </div>
+
+            <div>
+
+              <h3>
+                ${escapeHTML(student.name)}
+              </h3>
+
+              <p>
+                ${escapeHTML(student.level)}
+                ${
+                  student.section
+                    ? " • " +
+                      escapeHTML(student.section)
+                    : ""
+                }
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="attendance-actions">
+
+            <button
+              class="attendance-button present-button
+                ${
+                  record?.status === "present"
+                    ? "selected"
+                    : ""
+                }"
+              onclick="setAttendance(
+                ${student.id},
+                'present'
+              )">
+              🟢 Present
+            </button>
+
+            <button
+              class="attendance-button absent-button
+                ${
+                  record?.status === "absent"
+                    ? "selected"
+                    : ""
+                }"
+              onclick="setAttendance(
+                ${student.id},
+                'absent'
+              )">
+              🔴 Absent
+            </button>
+
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  await updateAttendanceSummary(
+    year,
+    date
+  );
 }
 
-async function setAttendance(studentId, status) {
-  const year = document.getElementById("attendanceAcademicYear")?.value;
-  const date = document.getElementById("attendanceDate")?.value;
-  if (!year || !date) return alert("Please select academic year and date.");
+async function setAttendance(
+  studentId,
+  status
+) {
 
-  // IMPORTANT: calculate semester using the current fixed function.
-  const semester = getSemesterFromDate(date);
-  if (!semester) return alert("Unable to determine semester from this date.");
+  const year =
+    document.getElementById(
+      "attendanceAcademicYear"
+    )?.value;
 
-  const all = await getAllRecords(STORES.attendance);
-  const existing = all.find(a => a.studentId === studentId && a.workspace === currentWorkspace && a.academicYear === year && a.date === date);
-  const s = await getRecord(STORES.students, studentId);
-  const now = new Date().toISOString();
+  const date =
+    document.getElementById(
+      "attendanceDate"
+    )?.value;
+
+  if (!year || !date) {
+    return alert(
+      "Please select academic year and date."
+    );
+  }
+
+  const semester =
+    getSemesterFromDate(date);
+
+  if (!semester) {
+    return alert(
+      "Unable to determine semester from this date."
+    );
+  }
+
+  const all =
+    await getAllRecords(
+      STORES.attendance
+    );
+
+  const existing =
+    all.find(attendance =>
+      attendance.studentId === studentId &&
+      attendance.workspace === currentWorkspace &&
+      attendance.academicYear === year &&
+      attendance.date === date
+    );
+
+  const student =
+    await getRecord(
+      STORES.students,
+      studentId
+    );
+
+  const now =
+    new Date().toISOString();
 
   if (existing) {
+
     existing.status = status;
     existing.semester = semester;
-    existing.month = date.slice(0, 7);
+    existing.month =
+      date.slice(0, 7);
     existing.updatedAt = now;
-    await updateRecord(STORES.attendance, existing);
+
+    await updateRecord(
+      STORES.attendance,
+      existing
+    );
+
   } else {
-    await addRecord(STORES.attendance, { studentId, studentName: s?.name || "", workspace: currentWorkspace, academicYear: year, semester, date, month: date.slice(0, 7), status, createdAt: now, updatedAt: now });
+
+    await addRecord(
+      STORES.attendance,
+      {
+        studentId,
+        studentName:
+          student?.name || "",
+        workspace:
+          currentWorkspace,
+        academicYear:
+          year,
+        semester,
+        date,
+        month:
+          date.slice(0, 7),
+        status,
+        createdAt: now,
+        updatedAt: now
+      }
+    );
   }
+
   await loadAttendance();
 }
 
-async function updateAttendanceSummary(year, date) {
-  const month = date.slice(0, 7);
-  const rs = (await getAllRecords(STORES.attendance)).filter(a => a.workspace === currentWorkspace && a.academicYear === year && a.month === month);
-  const p = rs.filter(a => a.status === "present").length;
-  const ab = rs.filter(a => a.status === "absent").length;
-  const total = p + ab;
-  document.getElementById("attendanceSummary")?.classList.remove("hidden");
-  const pt = document.getElementById("presentTotal");
-  const at = document.getElementById("absentTotal");
-  const sd = document.getElementById("schoolDaysTotal");
-  const ap = document.getElementById("attendancePercentage");
-  if (pt) pt.textContent = p;
-  if (at) at.textContent = ab;
-  if (sd) sd.textContent = countSchoolDays(year, month);
-  if (ap) ap.textContent = (total ? p / total * 100 : 0).toFixed(1) + "%";
+async function updateAttendanceSummary(
+  year,
+  date
+) {
+
+  const month =
+    date.slice(0, 7);
+
+  const records =
+    (
+      await getAllRecords(
+        STORES.attendance
+      )
+    ).filter(attendance =>
+      attendance.workspace === currentWorkspace &&
+      attendance.academicYear === year &&
+      attendance.month === month
+    );
+
+  const present =
+    records.filter(
+      attendance =>
+        attendance.status === "present"
+    ).length;
+
+  const absent =
+    records.filter(
+      attendance =>
+        attendance.status === "absent"
+    ).length;
+
+  const total =
+    present + absent;
+
+  document
+    .getElementById("attendanceSummary")
+    ?.classList.remove("hidden");
+
+  const presentTotal =
+    document.getElementById(
+      "presentTotal"
+    );
+
+  const absentTotal =
+    document.getElementById(
+      "absentTotal"
+    );
+
+  const schoolDaysTotal =
+    document.getElementById(
+      "schoolDaysTotal"
+    );
+
+  const attendancePercentage =
+    document.getElementById(
+      "attendancePercentage"
+    );
+
+  if (presentTotal) {
+    presentTotal.textContent =
+      present;
+  }
+
+  if (absentTotal) {
+    absentTotal.textContent =
+      absent;
+  }
+
+  if (schoolDaysTotal) {
+    schoolDaysTotal.textContent =
+      countSchoolDays(
+        year,
+        month
+      );
+  }
+
+  if (attendancePercentage) {
+    attendancePercentage.textContent =
+      (
+        total
+          ? present / total * 100
+          : 0
+      ).toFixed(1) + "%";
+  }
 }
 
-function countSchoolDays(year, month) {
-  const [y, m] = month.split("-").map(Number);
-  const last = new Date(y, m, 0).getDate();
-  let n = 0;
-  for (let d = 1; d <= last; d++) {
-    const day = new Date(y, m - 1, d).getDay();
-    if (day !== 0 && day !== 6) n++;
+function countSchoolDays(
+  year,
+  month
+) {
+
+  const [y, m] =
+    month
+      .split("-")
+      .map(Number);
+
+  const lastDay =
+    new Date(
+      y,
+      m,
+      0
+    ).getDate();
+
+  let count = 0;
+
+  for (
+    let day = 1;
+    day <= lastDay;
+    day++
+  ) {
+
+    const weekday =
+      new Date(
+        y,
+        m - 1,
+        day
+      ).getDay();
+
+    if (
+      weekday !== 0 &&
+      weekday !== 6
+    ) {
+      count++;
+    }
   }
-  return n;
+
+  return count;
 }
 
 // ============================================
@@ -526,30 +1743,121 @@ function countSchoolDays(year, month) {
 // ============================================
 
 async function computeGrades() {
-  const sid = Number(document.getElementById("gradeStudentSelect")?.value);
-  if (!sid || !selectedSubject || !selectedSemester) return alert("Please select a student, semester and subject.");
-  const final = await calculateSubjectGrade(sid, await getStudentAcademicYear(sid), selectedSemester, selectedSubject);
-  document.getElementById("subjectResult")?.classList.remove("hidden");
-  const value = document.getElementById("subjectGradeValue");
-  if (value) value.textContent = final.toFixed(2) + "%";
+
+  const studentId =
+    Number(
+      document
+        .getElementById(
+          "gradeStudentSelect"
+        )
+        ?.value
+    );
+
+  if (
+    !studentId ||
+    !selectedSubject ||
+    !selectedSemester
+  ) {
+    return alert(
+      "Please select a student, semester and subject."
+    );
+  }
+
+  const year =
+    await getStudentAcademicYear(
+      studentId
+    );
+
+  const finalGrade =
+    await calculateSubjectGrade(
+      studentId,
+      year,
+      selectedSemester,
+      selectedSubject
+    );
+
+  document
+    .getElementById(
+      "subjectResult"
+    )
+    ?.classList.remove("hidden");
+
+  const value =
+    document.getElementById(
+      "subjectGradeValue"
+    );
+
+  if (value) {
+    value.textContent =
+      finalGrade.toFixed(2) + "%";
+  }
 }
 
-async function calculateSubjectGrade(sid, year, sem, subject) {
-  const grades = await getAllRecords(STORES.grades);
-  const comps = GRADING_COMPONENTS[subject] || [];
+async function calculateSubjectGrade(
+  studentId,
+  academicYear,
+  semester,
+  subject
+) {
+
+  const grades =
+    await getAllRecords(
+      STORES.grades
+    );
+
+  const components =
+    GRADING_COMPONENTS[subject] || [];
+
   let total = 0;
-  for (const c of comps) {
-    if (c.name === "Attendance") {
-      const a = await getAttendancePercentageForStudent(sid, year, sem);
-      total += a.weighted;
+
+  for (
+    const component of components
+  ) {
+
+    if (
+      component.name === "Attendance"
+    ) {
+
+      const attendance =
+        await getAttendancePercentageForStudent(
+          studentId,
+          academicYear,
+          semester
+        );
+
+      total +=
+        attendance.weighted;
+
     } else {
-      const rs = grades.filter(r => r.studentId === sid && r.workspace === currentWorkspace && r.academicYear === year && r.semester === sem && r.subject === subject && r.component === c.name);
-      if (rs.length) {
-        const avg = rs.reduce((x,r) => x + Number(r.percentage), 0) / rs.length;
-        total += avg * c.weight / 100;
+
+      const records =
+        grades.filter(record =>
+          record.studentId === studentId &&
+          record.workspace === currentWorkspace &&
+          record.academicYear === academicYear &&
+          record.semester === semester &&
+          record.subject === subject &&
+          record.component === component.name
+        );
+
+      if (records.length) {
+
+        const average =
+          records.reduce(
+            (sum, record) =>
+              sum +
+              Number(record.percentage),
+            0
+          ) / records.length;
+
+        total +=
+          average *
+          component.weight /
+          100;
       }
     }
   }
+
   return total;
 }
 
@@ -558,41 +1866,223 @@ async function calculateSubjectGrade(sid, year, sem, subject) {
 // ============================================
 
 async function loadNoteStudents() {
-  const sel = document.getElementById("noteStudentSelect");
-  if (!sel) return;
-  const list = (await getAllRecords(STORES.students)).filter(x => x.workspace === currentWorkspace);
-  sel.innerHTML = '<option value="">Select Student</option>' + list.sort((a,b) => a.name.localeCompare(b.name)).map(x => `<option value="${x.id}">${escapeHTML(x.name)} — ${escapeHTML(x.level)}</option>`).join("");
+
+  const select =
+    document.getElementById(
+      "noteStudentSelect"
+    );
+
+  if (!select) return;
+
+  const list =
+    (
+      await getAllRecords(
+        STORES.students
+      )
+    ).filter(student =>
+      student.workspace === currentWorkspace
+    );
+
+  list.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  select.innerHTML =
+    '<option value="">Select Student</option>' +
+    list.map(student => `
+      <option value="${student.id}">
+        ${escapeHTML(student.name)}
+        —
+        ${escapeHTML(student.level)}
+      </option>
+    `).join("");
 }
 
 async function initializeNotes() {
-  const date = document.getElementById("noteDate");
-  if (date && !date.value) date.value = getTodayDate();
+
+  const date =
+    document.getElementById(
+      "noteDate"
+    );
+
+  if (
+    date &&
+    !date.value
+  ) {
+    date.value =
+      getTodayDate();
+  }
+
   await loadNoteStudents();
   await loadNotes();
 }
 
 async function saveNote() {
-  const sid = Number(document.getElementById("noteStudentSelect")?.value);
-  const date = document.getElementById("noteDate")?.value;
-  const text = document.getElementById("dailyNote")?.value.trim();
-  if (!sid || !date || !text) return alert("Select a student, date and enter a note.");
-  const student = await getRecord(STORES.students, sid);
-  await addRecord(STORES.notes, { studentId: sid, workspace: currentWorkspace, academicYear: student?.academicYear || "", date, note: text, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-  document.getElementById("dailyNote").value = "";
+
+  const studentId =
+    Number(
+      document
+        .getElementById(
+          "noteStudentSelect"
+        )
+        ?.value
+    );
+
+  const date =
+    document.getElementById(
+      "noteDate"
+    )?.value;
+
+  const text =
+    document.getElementById(
+      "dailyNote"
+    )?.value.trim();
+
+  if (
+    !studentId ||
+    !date ||
+    !text
+  ) {
+    return alert(
+      "Select a student, date and enter a note."
+    );
+  }
+
+  const student =
+    await getRecord(
+      STORES.students,
+      studentId
+    );
+
+  await addRecord(
+    STORES.notes,
+    {
+      studentId,
+      workspace:
+        currentWorkspace,
+      academicYear:
+        student?.academicYear || "",
+      date,
+      note: text,
+      createdAt:
+        new Date().toISOString(),
+      updatedAt:
+        new Date().toISOString()
+    }
+  );
+
+  document.getElementById(
+    "dailyNote"
+  ).value = "";
+
   await loadNotes();
 }
 
 async function loadNotes() {
-  const listEl = document.getElementById("notesList");
-  if (!listEl) return;
-  const rs = await getAllRecords(STORES.notes);
-  const students = await getAllRecords(STORES.students);
-  const list = rs.filter(r => r.workspace === currentWorkspace).sort((a,b) => b.date.localeCompare(a.date));
-  listEl.innerHTML = list.length ? list.map(r => { const s = students.find(x => x.id === r.studentId); return `<div class="note-card"><strong>${escapeHTML(s?.name || "Unknown Student")}</strong><small>${r.date} — ${escapeHTML(r.academicYear || "")}</small><p>${escapeHTML(r.note)}</p><button class="delete-button" onclick="removeNote(${r.id})">🗑️ Remove</button></div>`; }).join("") : '<div class="empty-state"><div class="empty-icon">📝</div><h3>No notes yet</h3></div>';
+
+  const listElement =
+    document.getElementById(
+      "notesList"
+    );
+
+  if (!listElement) return;
+
+  const records =
+    await getAllRecords(
+      STORES.notes
+    );
+
+  const students =
+    await getAllRecords(
+      STORES.students
+    );
+
+  const list =
+    records
+      .filter(record =>
+        record.workspace === currentWorkspace
+      )
+      .sort((a, b) =>
+        b.date.localeCompare(a.date)
+      );
+
+  if (!list.length) {
+
+    listElement.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          📝
+        </div>
+
+        <h3>
+          No notes yet
+        </h3>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  listElement.innerHTML =
+    list.map(record => {
+
+      const student =
+        students.find(
+          s =>
+            s.id === record.studentId
+        );
+
+      return `
+        <div class="note-card">
+
+          <strong>
+            ${escapeHTML(
+              student?.name ||
+              "Unknown Student"
+            )}
+          </strong>
+
+          <small>
+            ${record.date}
+            —
+            ${escapeHTML(
+              record.academicYear || ""
+            )}
+          </small>
+
+          <p>
+            ${escapeHTML(record.note)}
+          </p>
+
+          <button
+            class="delete-button"
+            onclick="removeNote(${record.id})">
+            🗑️ Remove
+          </button>
+
+        </div>
+      `;
+
+    }).join("");
 }
 
 async function removeNote(id) {
-  if (confirm("Remove this note?")) { await deleteRecord(STORES.notes, id); await loadNotes(); }
+
+  if (
+    confirm(
+      "Remove this note?"
+    )
+  ) {
+
+    await deleteRecord(
+      STORES.notes,
+      id
+    );
+
+    await loadNotes();
+  }
 }
 
 // ============================================
@@ -600,92 +2090,550 @@ async function removeNote(id) {
 // ============================================
 
 async function loadReportStudents() {
-  const sel = document.getElementById("reportStudentSelect");
-  if (!sel) return;
-  const list = (await getAllRecords(STORES.students)).filter(s => s.workspace === currentWorkspace);
-  sel.innerHTML = '<option value="">Select Student</option>' + list.sort((a,b) => a.name.localeCompare(b.name)).map(s => `<option
-  value="${s.id}"
-  data-academic-year="${escapeHTML(s.academicYear || "")}"
->
-  ${escapeHTML(s.name)}
-  — ${escapeHTML(s.level)}
-  (${escapeHTML(s.academicYear)})
-</option>
+
+  const select =
+    document.getElementById(
+      "reportStudentSelect"
+    );
+
+  if (!select) return;
+
+  const list =
+    (
+      await getAllRecords(
+        STORES.students
+      )
+    ).filter(student =>
+      student.workspace === currentWorkspace
+    );
+
+  list.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  // FIXED:
+  // The original code was missing the closing
+  // </option>, map closing and join("").
+
+  select.innerHTML =
+    '<option value="">Select Student</option>' +
+    list.map(student => `
+      <option
+        value="${student.id}"
+        data-academic-year="${escapeHTML(
+          student.academicYear || ""
+        )}">
+        ${escapeHTML(student.name)}
+        —
+        ${escapeHTML(student.level)}
+        (${escapeHTML(student.academicYear || "")})
+      </option>
+    `).join("");
 }
 
 async function generateReportCard() {
-  const sid = Number(document.getElementById("reportStudentSelect")?.value);
-  const sem = document.getElementById("reportSemester")?.value;
-  if (!sid) return alert("Please select a student.");
-  const s = await getRecord(STORES.students, sid);
-  if (!s) { await loadReportStudents(); document.getElementById("reportPreview").innerHTML = ""; return alert("This student no longer exists. Please select another student."); }
 
-  const year = s.academicYear;
+  const studentId =
+    Number(
+      document
+        .getElementById(
+          "reportStudentSelect"
+        )
+        ?.value
+    );
+
+  const semester =
+    document.getElementById(
+      "reportSemester"
+    )?.value;
+
+  if (!studentId) {
+    return alert(
+      "Please select a student."
+    );
+  }
+
+  const student =
+    await getRecord(
+      STORES.students,
+      studentId
+    );
+
+  if (!student) {
+
+    await loadReportStudents();
+
+    const preview =
+      document.getElementById(
+        "reportPreview"
+      );
+
+    if (preview) {
+      preview.innerHTML = "";
+    }
+
+    return alert(
+      "This student no longer exists. Please select another student."
+    );
+  }
+
+  const year =
+    student.academicYear;
+
   let rows = "";
+
   let overall = 0;
   let count = 0;
-  for (const subject of Object.keys(GRADING_COMPONENTS)) {
-    const grade = await calculateSubjectGrade(sid, year, sem, subject);
+
+  for (
+    const subject of
+    Object.keys(GRADING_COMPONENTS)
+  ) {
+
+    const grade =
+      await calculateSubjectGrade(
+        studentId,
+        year,
+        semester,
+        subject
+      );
+
     overall += grade;
     count++;
-    rows += `<tr><td>${subject}</td><td>${grade.toFixed(2)}%</td><td>${grade >= 75 ? "PASS" : "Needs Improvement"}</td></tr>`;
+
+    rows += `
+      <tr>
+
+        <td>
+          ${escapeHTML(subject)}
+        </td>
+
+        <td>
+          ${grade.toFixed(2)}%
+        </td>
+
+        <td>
+          ${
+            grade >= 75
+              ? "PASS"
+              : "Needs Improvement"
+          }
+        </td>
+
+      </tr>
+    `;
   }
-  const att = await getAttendancePercentageForStudent(sid, year, sem);
-  const preview = document.getElementById("reportPreview");
+
+  const attendance =
+    await getAttendancePercentageForStudent(
+      studentId,
+      year,
+      semester
+    );
+
+  const preview =
+    document.getElementById(
+      "reportPreview"
+    );
+
   if (!preview) return;
-  preview.innerHTML = `<div class="report-card"><h1>🎓 Personal Grading System</h1><h2>Student Report Card</h2><p><strong>Student:</strong> ${escapeHTML(s.name)} &nbsp; <strong>ID:</strong> ${escapeHTML(s.studentId)}</p><p><strong>Level:</strong> ${escapeHTML(s.level)} &nbsp; <strong>Academic Year:</strong> ${escapeHTML(year)}</p><p><strong>Semester:</strong> ${sem === "first" ? "First Semester" : "Second Semester"}</p><table><thead><tr><th>Subject</th><th>Grade</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table><div class="report-attendance"><strong>Attendance:</strong> ${att.percentage.toFixed(2)}% (${att.present} Present / ${att.absent} Absent)</div><h2>Overall Average: ${(count ? overall / count : 0).toFixed(2)}%</h2><button class="primary-button" onclick="window.print()">🖨️ Print Report Card</button></div>`;
+
+  const semesterName =
+    semester === "first"
+      ? "First Semester"
+      : "Second Semester";
+
+  const overallAverage =
+    count
+      ? overall / count
+      : 0;
+
+  preview.innerHTML = `
+
+    <div class="report-card">
+
+      <h1>
+        🎓 Personal Grading System
+      </h1>
+
+      <h2>
+        Student Report Card
+      </h2>
+
+      <p>
+        <strong>Student:</strong>
+        ${escapeHTML(student.name)}
+
+        &nbsp;
+
+        <strong>ID:</strong>
+        ${escapeHTML(student.studentId)}
+      </p>
+
+      <p>
+        <strong>Level:</strong>
+        ${escapeHTML(student.level)}
+
+        &nbsp;
+
+        <strong>Academic Year:</strong>
+        ${escapeHTML(year)}
+      </p>
+
+      <p>
+        <strong>Semester:</strong>
+        ${semesterName}
+      </p>
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Subject</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+          ${rows}
+        </tbody>
+
+      </table>
+
+      <div class="report-attendance">
+
+        <strong>
+          Attendance:
+        </strong>
+
+        ${attendance.percentage.toFixed(2)}%
+
+        (
+        ${attendance.present} Present /
+        ${attendance.absent} Absent
+        )
+
+      </div>
+
+      <h2>
+        Overall Average:
+        ${overallAverage.toFixed(2)}%
+      </h2>
+
+      <button
+        class="primary-button"
+        onclick="window.print()">
+        🖨️ Print Report Card
+      </button>
+
+    </div>
+  `;
 }
 
 // ============================================
 // EXPORTS
 // ============================================
 
-function csvCell(v) { return `"${String(v ?? "").replace(/"/g, '""')}"`; }
-function downloadCSV(name, rows) {
-  const csv = rows.map(r => r.map(csvCell).join(",")).join("\r\n");
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 0);
+function csvCell(value) {
+
+  return `"${String(
+    value ?? ""
+  ).replace(/"/g, '""')}"`;
+}
+
+function downloadCSV(
+  filename,
+  rows
+) {
+
+  const csv =
+    rows
+      .map(row =>
+        row
+          .map(csvCell)
+          .join(",")
+      )
+      .join("\r\n");
+
+  const blob =
+    new Blob(
+      ["\ufeff" + csv],
+      {
+        type:
+          "text/csv;charset=utf-8"
+      }
+    );
+
+  const link =
+    document.createElement("a");
+
+  link.href =
+    URL.createObjectURL(blob);
+
+  link.download =
+    filename;
+
+  link.click();
+
+  setTimeout(
+    () =>
+      URL.revokeObjectURL(
+        link.href
+      ),
+    0
+  );
 }
 
 async function exportDetailedGrades() {
-  const rs = (await getAllRecords(STORES.grades)).filter(r => r.workspace === currentWorkspace);
-  downloadCSV("Grade_Detailed_Records.csv", [["Student ID","Record","Academic Year","Semester","Subject","Component","Date","Score","Total","Percentage","Notes"], ...rs.map(r => [r.studentId,r.recordName,r.academicYear,r.semester,r.subject,r.component,r.date,r.score,r.total,Number(r.percentage).toFixed(2)+"%",r.notes])]);
+
+  const records =
+    (
+      await getAllRecords(
+        STORES.grades
+      )
+    ).filter(record =>
+      record.workspace === currentWorkspace
+    );
+
+  downloadCSV(
+    "Grade_Detailed_Records.csv",
+    [
+      [
+        "Student ID",
+        "Record",
+        "Academic Year",
+        "Semester",
+        "Subject",
+        "Component",
+        "Date",
+        "Score",
+        "Total",
+        "Percentage",
+        "Notes"
+      ],
+
+      ...records.map(record => [
+        record.studentId,
+        record.recordName,
+        record.academicYear,
+        record.semester,
+        record.subject,
+        record.component,
+        record.date,
+        record.score,
+        record.total,
+        Number(record.percentage)
+          .toFixed(2) + "%",
+        record.notes
+      ])
+    ]
+  );
 }
 
 async function exportGradeSummary() {
-  const students = (await getAllRecords(STORES.students)).filter(s => s.workspace === currentWorkspace);
-  const rows = [["Student","Student ID","Academic Year","Level","Semester","English","Mathematics","Science"]];
-  for (const s of students) for (const sem of ["first","second"]) {
-    const grades = await Promise.all(Object.keys(GRADING_COMPONENTS).map(x => calculateSubjectGrade(s.id, s.academicYear, sem, x)));
-    rows.push([s.name,s.studentId,s.academicYear,s.level,sem === "first" ? "First Semester" : "Second Semester",...grades.map(x => x.toFixed(2)+"%")]);
+
+  const students =
+    (
+      await getAllRecords(
+        STORES.students
+      )
+    ).filter(student =>
+      student.workspace === currentWorkspace
+    );
+
+  const rows = [
+    [
+      "Student",
+      "Student ID",
+      "Academic Year",
+      "Level",
+      "Semester",
+      "English",
+      "Mathematics",
+      "Science"
+    ]
+  ];
+
+  for (
+    const student of students
+  ) {
+
+    for (
+      const semester of
+      ["first", "second"]
+    ) {
+
+      const grades =
+        await Promise.all(
+          Object.keys(
+            GRADING_COMPONENTS
+          ).map(subject =>
+            calculateSubjectGrade(
+              student.id,
+              student.academicYear,
+              semester,
+              subject
+            )
+          )
+        );
+
+      rows.push([
+        student.name,
+        student.studentId,
+        student.academicYear,
+        student.level,
+
+        semester === "first"
+          ? "First Semester"
+          : "Second Semester",
+
+        ...grades.map(
+          grade =>
+            grade.toFixed(2) + "%"
+        )
+      ]);
+    }
   }
-  downloadCSV("Grade_Summary.csv", rows);
+
+  downloadCSV(
+    "Grade_Summary.csv",
+    rows
+  );
 }
 
 async function exportAttendanceMonthly() {
-  const students = (await getAllRecords(STORES.students)).filter(s => s.workspace === currentWorkspace);
-  const att = await getAllRecords(STORES.attendance);
-  const rows = [["Student Name","Student ID","Academic Year","Month","Present","Absent","Total Marked","Attendance %"]];
-  for (const s of students) {
-    const months = [...new Set(att.filter(a => a.studentId === s.id && a.workspace === currentWorkspace).map(a => a.month))].sort();
-    for (const m of months) {
-      const rs = att.filter(a => a.studentId === s.id && a.workspace === currentWorkspace && a.month === m);
-      const p = rs.filter(a => a.status === "present").length;
-      const ab = rs.filter(a => a.status === "absent").length;
-      const t = p + ab;
-      rows.push([s.name,s.studentId,s.academicYear,m,p,ab,t,(t ? p/t*100 : 0).toFixed(2)+"%"]);
+
+  const students =
+    (
+      await getAllRecords(
+        STORES.students
+      )
+    ).filter(student =>
+      student.workspace === currentWorkspace
+    );
+
+  const attendance =
+    await getAllRecords(
+      STORES.attendance
+    );
+
+  const rows = [
+    [
+      "Student Name",
+      "Student ID",
+      "Academic Year",
+      "Month",
+      "Present",
+      "Absent",
+      "Total Marked",
+      "Attendance %"
+    ]
+  ];
+
+  for (
+    const student of students
+  ) {
+
+    const months = [
+      ...new Set(
+        attendance
+          .filter(record =>
+            record.studentId === student.id &&
+            record.workspace === currentWorkspace
+          )
+          .map(record =>
+            record.month
+          )
+      )
+    ].sort();
+
+    for (
+      const month of months
+    ) {
+
+      const records =
+        attendance.filter(record =>
+          record.studentId === student.id &&
+          record.workspace === currentWorkspace &&
+          record.month === month
+        );
+
+      const present =
+        records.filter(
+          record =>
+            record.status === "present"
+        ).length;
+
+      const absent =
+        records.filter(
+          record =>
+            record.status === "absent"
+        ).length;
+
+      const total =
+        present + absent;
+
+      rows.push([
+        student.name,
+        student.studentId,
+        student.academicYear,
+        month,
+        present,
+        absent,
+        total,
+        (
+          total
+            ? present / total * 100
+            : 0
+        ).toFixed(2) + "%"
+      ]);
     }
   }
-  downloadCSV("Attendance_Monthly_Summary.csv", rows);
+
+  downloadCSV(
+    "Attendance_Monthly_Summary.csv",
+    rows
+  );
 }
 
 async function exportAttendanceAll() {
-  const rs = (await getAllRecords(STORES.attendance)).filter(r => r.workspace === currentWorkspace);
-  downloadCSV("Attendance_Detailed.csv", [["Student Name","Student ID","Academic Year","Date","Month","Semester","Status"], ...rs.map(r => [r.studentName,r.studentId,r.academicYear,r.date,r.month,r.semester,r.status])]);
+
+  const records =
+    (
+      await getAllRecords(
+        STORES.attendance
+      )
+    ).filter(record =>
+      record.workspace === currentWorkspace
+    );
+
+  downloadCSV(
+    "Attendance_Detailed.csv",
+    [
+      [
+        "Student Name",
+        "Student ID",
+        "Academic Year",
+        "Date",
+        "Month",
+        "Semester",
+        "Status"
+      ],
+
+      ...records.map(record => [
+        record.studentName,
+        record.studentId,
+        record.academicYear,
+        record.date,
+        record.month,
+        record.semester,
+        record.status
+      ])
+    ]
+  );
 }
 
 // ============================================
@@ -693,71 +2641,216 @@ async function exportAttendanceAll() {
 // ============================================
 
 async function getStudentAcademicYear(id) {
-  const s = await getRecord(STORES.students, Number(id));
-  return s?.academicYear || null;
+
+  const student =
+    await getRecord(
+      STORES.students,
+      Number(id)
+    );
+
+  return student?.academicYear || null;
 }
 
-function getSelectedAcademicYear() { return document.getElementById("academicYearSelect")?.value || ""; }
+function getSelectedAcademicYear() {
+
+  return (
+    document.getElementById(
+      "academicYearSelect"
+    )?.value || ""
+  );
+}
 
 function getTodayDate() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+  const date =
+    new Date();
+
+  return `
+    ${date.getFullYear()}-
+    ${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-
+    ${String(
+      date.getDate()
+    ).padStart(2, "0")}
+  `.replace(/\s/g, "");
 }
 
 function getAcademicYearFromToday() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = d.getMonth() + 1;
-  return `${m >= 8 ? y : y-1}–${m >= 8 ? y+1 : y}`;
+
+  const date =
+    new Date();
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    date.getMonth() + 1;
+
+  return `${
+    month >= 8
+      ? year
+      : year - 1
+  }–${
+    month >= 8
+      ? year + 1
+      : year
+  }`;
 }
 
-function formatNumber(v) {
-  const n = Number(v);
-  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+function formatNumber(value) {
+
+  const number =
+    Number(value);
+
+  return Number.isInteger(number)
+    ? String(number)
+    : number.toFixed(2);
 }
 
-function escapeHTML(v) {
-  const d = document.createElement("div");
-  d.textContent = v == null ? "" : v;
-  return d.innerHTML;
+function escapeHTML(value) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    value == null
+      ? ""
+      : value;
+
+  return div.innerHTML;
 }
 
 function resetRecordsInterface() {
+
   selectedSemester = null;
   selectedSubject = null;
   selectedComponentIndex = null;
   editingGradeId = null;
-  document.getElementById("subjectArea")?.classList.add("hidden");
-  document.getElementById("componentArea")?.classList.add("hidden");
-  document.getElementById("subjectResult")?.classList.add("hidden");
+
+  closeGradeRecordForm();
+
+  document
+    .getElementById("subjectArea")
+    ?.classList.add("hidden");
+
+  document
+    .getElementById("componentArea")
+    ?.classList.add("hidden");
+
+  document
+    .getElementById("subjectResult")
+    ?.classList.add("hidden");
 }
 
 // ============================================
-// START
+// START APPLICATION
 // ============================================
 
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("Personal Grading System loaded.");
-  const ay = document.getElementById("academicYearSelect");
-  if (ay) ay.value = "2026–2027";
-  const ad = document.getElementById("attendanceDate");
-  if (ad) ad.value = getTodayDate();
-  const nd = document.getElementById("noteDate");
-  if (nd) nd.value = getTodayDate();
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").then(() => console.log("✅ Service Worker registered.")).catch(error => console.warn("Service Worker registration failed:", error));
+    console.log(
+      "Personal Grading System loaded."
+    );
+
+    const academicYear =
+      document.getElementById(
+        "academicYearSelect"
+      );
+
+    if (academicYear) {
+      academicYear.value =
+        "2026–2027";
+    }
+
+    const attendanceDate =
+      document.getElementById(
+        "attendanceDate"
+      );
+
+    if (attendanceDate) {
+      attendanceDate.value =
+        getTodayDate();
+    }
+
+    const noteDate =
+      document.getElementById(
+        "noteDate"
+      );
+
+    if (noteDate) {
+      noteDate.value =
+        getTodayDate();
+    }
+
+    // Service Worker
+    if (
+      "serviceWorker" in navigator
+    ) {
+
+      navigator.serviceWorker
+        .register("sw.js")
+        .then(() => {
+
+          console.log(
+            "✅ Service Worker registered."
+          );
+
+        })
+        .catch(error => {
+
+          console.warn(
+            "Service Worker registration failed:",
+            error
+          );
+
+        });
+    }
+
+    setupLogin();
+
+    await checkLoginSession();
   }
-  setupLogin();
-  await checkLoginSession();
-});
+);
 
-if (typeof supabaseClient !== "undefined") {
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    console.log("Auth event:", event);
-    if (event === "SIGNED_OUT") showLoginPage();
-    if (event === "SIGNED_IN" && session) showApp();
-  });
+// ============================================
+// SUPABASE AUTH STATE
+// ============================================
+
+if (
+  typeof supabaseClient !==
+  "undefined"
+) {
+
+  supabaseClient.auth
+    .onAuthStateChange(
+      (event, session) => {
+
+        console.log(
+          "Auth event:",
+          event
+        );
+
+        if (
+          event ===
+          "SIGNED_OUT"
+        ) {
+          showLoginPage();
+        }
+
+        if (
+          event ===
+            "SIGNED_IN" &&
+          session
+        ) {
+          showApp();
+        }
+      }
+    );
 }
 
-console.log("Personal Grading System loaded.");
+console.log(
+  "Personal Grading System loaded."
+);
