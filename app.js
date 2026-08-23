@@ -1264,6 +1264,26 @@ function getSemesterFromDate(date) {
   return null;
 }
 
+// ============================================
+// ATTENDANCE CALCULATION
+// ============================================
+// IMPORTANT:
+// Existing attendance records may not have a
+// "semester" field.
+//
+// New records do have semester because setAttendance()
+// saves it.
+//
+// For old records without semester, we determine
+// the semester from the actual attendance date.
+//
+// This function is used by:
+// Attendance component
+// Grade Calculation
+// Report Card
+// Grade Summary Export
+// ============================================
+
 async function getAttendancePercentageForStudent(
   studentId,
   year,
@@ -1276,15 +1296,51 @@ async function getAttendancePercentageForStudent(
     );
 
   const records =
-    all.filter(attendance =>
-      attendance.studentId === studentId &&
-      attendance.workspace === currentWorkspace &&
-      attendance.academicYear === year &&
-      (
-        !semester ||
-        attendance.semester === semester
-      )
-    );
+    all.filter(attendance => {
+
+      // --------------------------------------------
+      // Basic student/workspace/year filtering
+      // --------------------------------------------
+
+      if (
+        attendance.studentId !== studentId ||
+        attendance.workspace !== currentWorkspace ||
+        attendance.academicYear !== year
+      ) {
+        return false;
+      }
+
+      // --------------------------------------------
+      // Determine semester
+      // --------------------------------------------
+      //
+      // If the record already has semester,
+      // use the stored value.
+      //
+      // If semester is missing, determine it
+      // from the attendance date.
+      //
+
+      const recordSemester =
+        attendance.semester ||
+        getSemesterFromDate(attendance.date);
+
+      // --------------------------------------------
+      // If no semester was requested,
+      // include all attendance records.
+      // --------------------------------------------
+
+      if (!semester) {
+        return true;
+      }
+
+      // --------------------------------------------
+      // Only count attendance records belonging
+      // to the selected semester.
+      // --------------------------------------------
+
+      return recordSemester === semester;
+    });
 
   const present =
     records.filter(
@@ -1311,6 +1367,8 @@ async function getAttendancePercentageForStudent(
     absent,
     total,
     percentage,
+
+    // Attendance is worth 5% of every subject.
     weighted:
       percentage * 0.05
   };
@@ -2110,10 +2168,6 @@ async function loadReportStudents() {
   list.sort((a, b) =>
     a.name.localeCompare(b.name)
   );
-
-  // FIXED:
-  // The original code was missing the closing
-  // </option>, map closing and join("").
 
   select.innerHTML =
     '<option value="">Select Student</option>' +
