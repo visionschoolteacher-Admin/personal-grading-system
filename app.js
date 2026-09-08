@@ -1348,23 +1348,34 @@ async function getAttendancePercentageForStudent(
         attendance.status === "present"
     ).length;
 
+  const late =
+    records.filter(
+      attendance =>
+        attendance.status === "late"
+    ).length;
+
   const absent =
     records.filter(
       attendance =>
         attendance.status === "absent"
     ).length;
 
+  const attended =
+    present + late;
+
   const total =
-    present + absent;
+    attended + absent;
 
   const percentage =
     total
-      ? present / total * 100
+      ? attended / total * 100
       : 0;
 
   return {
     present,
+    late,
     absent,
+    attended,
     total,
     percentage,
 
@@ -1564,6 +1575,20 @@ async function loadAttendance() {
               🔴 Absent
             </button>
 
+            <button
+              class="attendance-button late-button
+                ${
+                  record?.status === "late"
+                    ? "selected"
+                    : ""
+                }"
+              onclick="setAttendance(
+                ${student.id},
+                'late'
+              )">
+              🟡 Late
+            </button>
+
           </div>
 
         </div>
@@ -1692,14 +1717,23 @@ async function updateAttendanceSummary(
         attendance.status === "present"
     ).length;
 
+  const late =
+    records.filter(
+      attendance =>
+        attendance.status === "late"
+    ).length;
+
   const absent =
     records.filter(
       attendance =>
         attendance.status === "absent"
     ).length;
 
+  const attended =
+    present + late;
+
   const total =
-    present + absent;
+    attended + absent;
 
   document
     .getElementById("attendanceSummary")
@@ -1747,7 +1781,7 @@ async function updateAttendanceSummary(
     attendancePercentage.textContent =
       (
         total
-          ? present / total * 100
+          ? attended / total * 100
           : 0
       ).toFixed(1) + "%";
   }
