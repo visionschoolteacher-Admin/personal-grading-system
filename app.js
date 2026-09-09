@@ -1031,6 +1031,7 @@ async function renderComponentRecords(index) {
 
         <small>
           ${attendance.present} Present /
+          ${attendance.late} Late /
           ${attendance.absent} Absent /
           ${attendance.total} Marked
         </small>
@@ -2401,6 +2402,7 @@ async function generateReportCard() {
 
         (
         ${attendance.present} Present /
+        ${attendance.late} Late /
         ${attendance.absent} Absent
         )
 
@@ -2615,6 +2617,7 @@ async function exportAttendanceMonthly() {
       "Academic Year",
       "Month",
       "Present",
+      "Late",
       "Absent",
       "Total Marked",
       "Attendance %"
@@ -2655,14 +2658,24 @@ async function exportAttendanceMonthly() {
             record.status === "present"
         ).length;
 
+      const late =
+        records.filter(
+          record =>
+            record.status === "late"
+        ).length;
+
       const absent =
         records.filter(
           record =>
             record.status === "absent"
         ).length;
 
+      // Present + Late are both treated as attended.
+      const attended =
+        present + late;
+
       const total =
-        present + absent;
+        attended + absent;
 
       rows.push([
         student.name,
@@ -2670,11 +2683,12 @@ async function exportAttendanceMonthly() {
         student.academicYear,
         month,
         present,
+        late,
         absent,
         total,
         (
           total
-            ? present / total * 100
+            ? attended / total * 100
             : 0
         ).toFixed(2) + "%"
       ]);
