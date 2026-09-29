@@ -2409,12 +2409,8 @@ async function generateReportCard() {
     <div class="report-card">
 
       <h1>
-        🎓 Personal Grading System
-      </h1>
-
-      <h2>
         Student Report Card
-      </h2>
+      </h1>
 
       <p>
         <strong>Student:</strong>
