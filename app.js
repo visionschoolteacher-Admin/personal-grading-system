@@ -22,7 +22,7 @@ const GRADING_COMPONENTS = {
     { name: "Speaking & Listening", weight: 20 },
     { name: "Homework, Classwork & Participation", weight: 10 },
     { name: "Semestrial Examination", weight: 25 },
-    { name: "Attendance", weight: 5 }
+    { name: "Attendance", weight: 5, type: "attendance" }
   ],
 
   Mathematics: [
@@ -32,7 +32,7 @@ const GRADING_COMPONENTS = {
     { name: "Homework", weight: 10 },
     { name: "Participation", weight: 15 },
     { name: "Semestrial Examination", weight: 25 },
-    { name: "Attendance", weight: 5 }
+    { name: "Attendance", weight: 5, type: "attendance" }
   ],
 
   Science: [
@@ -42,9 +42,348 @@ const GRADING_COMPONENTS = {
     { name: "Classwork", weight: 10 },
     { name: "Participation", weight: 10 },
     { name: "Semestrial Examination", weight: 25 },
-    { name: "Attendance", weight: 5 }
+    { name: "Attendance", weight: 5, type: "attendance" }
   ]
 };
+
+/* ============================================
+   METRIC SETTINGS — ADDITIVE UPDATE ONLY
+   Keeps the existing grading system intact.
+   Settings are stored locally per workspace.
+   ============================================ */
+
+const METRIC_SETTINGS_KEY = "personalGradingSystemMetricSettings_v1";
+
+function isAttendanceComponent(component) {
+  return component?.type === "attendance" || component?.name === "Attendance";
+}
+
+function getMetricSettingsStorage() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(METRIC_SETTINGS_KEY) || "{}"
+    );
+  } catch (error) {
+    console.warn("Could not read metric settings:", error);
+    return {};
+  }
+}
+
+function saveMetricSettingsStorage(settings) {
+  try {
+    localStorage.setItem(
+      METRIC_SETTINGS_KEY,
+      JSON.stringify(settings)
+    );
+    return true;
+  } catch (error) {
+    console.error("Could not save metric settings:", error);
+    return false;
+  }
+}
+
+function applyMetricSettingsForWorkspace(workspace) {
+  if (!workspace) return;
+
+  const settings = getMetricSettingsStorage();
+  const workspaceSettings = settings[workspace];
+
+  if (!workspaceSettings) return;
+
+  Object.keys(GRADING_COMPONENTS).forEach(subject => {
+    const saved = workspaceSettings[subject];
+
+    if (!Array.isArray(saved)) return;
+
+    const current = GRADING_COMPONENTS[subject];
+
+    saved.forEach((savedComponent, index) => {
+      if (!current[index]) return;
+
+      if (
+        typeof savedComponent.name === "string" &&
+        savedComponent.name.trim()
+      ) {
+        current[index].name = savedComponent.name.trim();
+      }
+
+      const weight = Number(savedComponent.weight);
+
+      if (
+        Number.isFinite(weight) &&
+        weight >= 0 &&
+        weight <= 100
+      ) {
+        current[index].weight = weight;
+      }
+
+      if (isAttendanceComponent(current[index])) {
+        current[index].type = "attendance";
+      }
+    });
+  });
+}
+
+function getMetricSettingsForWorkspace(workspace) {
+  const settings = getMetricSettingsStorage();
+  const result = {};
+
+  Object.keys(GRADING_COMPONENTS).forEach(subject => {
+    result[subject] = GRADING_COMPONENTS[subject].map(component => ({
+      name: component.name,
+      weight: Number(component.weight),
+      ...(isAttendanceComponent(component)
+        ? { type: "attendance" }
+        : {})
+    }));
+  });
+
+  return result;
+}
+
+function ensureMetricEditorUI() {
+  if (!currentWorkspace) return;
+
+  // Add only the new navigation button if it does not already exist.
+  if (!document.getElementById("metricEditorNavButton")) {
+    const existingNavButton =
+      document.querySelector(".nav-button");
+
+    if (existingNavButton?.parentElement) {
+      const button =
+        document.createElement("button");
+
+      button.id = "metricEditorNavButton";
+      button.className = "nav-button";
+      button.type = "button";
+      button.textContent = "⚙️ Edit Metrics";
+      button.addEventListener("click", () => {
+        showSection("metrics");
+      });
+
+      existingNavButton.parentElement.appendChild(button);
+    }
+  }
+
+  // Add only the new section. No existing section is replaced.
+  if (!document.getElementById("metricsSection")) {
+    const workspace =
+      document.getElementById("workspacePage");
+
+    if (workspace) {
+      const section =
+        document.createElement("section");
+
+      section.id = "metricsSection";
+      section.className = "hidden";
+      section.innerHTML = `
+        <div class="section-header">
+          <div>
+            <h2>⚙️ Edit Metrics</h2>
+            <p>Edit grading metric names and percentages for this workspace.</p>
+          </div>
+        </div>
+
+        <div id="metricEditorContent"></div>
+      `;
+
+      workspace.appendChild(section);
+    }
+  }
+}
+
+function renderMetricEditor() {
+  const container =
+    document.getElementById("metricEditorContent");
+
+  if (!container) return;
+
+  container.innerHTML = Object.keys(GRADING_COMPONENTS)
+    .map(subject => {
+      const components =
+        GRADING_COMPONENTS[subject] || [];
+
+      const total =
+        components.reduce(
+          (sum, component) =>
+            sum + Number(component.weight || 0),
+          0
+        );
+
+      return `
+        <div class="component-card metric-editor-card">
+          <div class="component-card-header">
+            <h3>${escapeHTML(subject)}</h3>
+            <span class="weight-badge">
+              Total: ${total.toFixed(2)}%
+            </span>
+          </div>
+
+          <div class="metric-editor-list">
+            ${components.map((component, index) => `
+              <div class="form-grid metric-editor-row">
+                <input
+                  type="text"
+                  id="metricName-${subject}-${index}"
+                  value="${escapeHTML(component.name)}"
+                  placeholder="Metric name"
+                  aria-label="${escapeHTML(subject)} metric name">
+
+                <input
+                  type="number"
+                  id="metricWeight-${subject}-${index}"
+                  value="${Number(component.weight)}"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="Percentage"
+                  aria-label="${escapeHTML(subject)} metric percentage">
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="primary-button"
+              onclick="saveMetricSettings('${subject}')">
+              💾 Save ${escapeHTML(subject)}
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+async function saveMetricSettings(subject) {
+  const components =
+    GRADING_COMPONENTS[subject] || [];
+
+  if (!components.length) return;
+
+  const updated = [];
+
+  for (let index = 0; index < components.length; index++) {
+    const nameInput =
+      document.getElementById(
+        `metricName-${subject}-${index}`
+      );
+
+    const weightInput =
+      document.getElementById(
+        `metricWeight-${subject}-${index}`
+      );
+
+    const name =
+      nameInput?.value.trim() || "";
+
+    const weight =
+      Number(weightInput?.value);
+
+    if (!name) {
+      return alert(
+        `Please enter a name for metric ${index + 1}.`
+      );
+    }
+
+    if (
+      !Number.isFinite(weight) ||
+      weight < 0 ||
+      weight > 100
+    ) {
+      return alert(
+        `Please enter a valid percentage for "${name}".`
+      );
+    }
+
+    updated.push({
+      oldName: components[index].name,
+      name,
+      weight,
+      type: isAttendanceComponent(components[index])
+        ? "attendance"
+        : undefined
+    });
+  }
+
+  const total =
+    updated.reduce(
+      (sum, component) =>
+        sum + component.weight,
+      0
+    );
+
+  if (Math.abs(total - 100) > 0.001) {
+    return alert(
+      `${subject} metrics must total exactly 100%. Current total: ${total.toFixed(2)}%.`
+    );
+  }
+
+  const allGrades =
+    await getAllRecords(STORES.grades);
+
+  // Preserve existing grade history when a metric is renamed.
+  for (const change of updated) {
+    if (change.oldName === change.name) continue;
+
+    const matchingRecords =
+      allGrades.filter(record =>
+        record.workspace === currentWorkspace &&
+        record.subject === subject &&
+        record.component === change.oldName
+      );
+
+    for (const record of matchingRecords) {
+      record.component = change.name;
+      record.componentWeight = change.weight;
+      await updateRecord(
+        STORES.grades,
+        record
+      );
+    }
+  }
+
+  components.forEach((component, index) => {
+    component.name = updated[index].name;
+    component.weight = updated[index].weight;
+
+    if (updated[index].type === "attendance") {
+      component.type = "attendance";
+    }
+  });
+
+  const settings =
+    getMetricSettingsStorage();
+
+  settings[currentWorkspace] =
+    getMetricSettingsForWorkspace(
+      currentWorkspace
+    );
+
+  if (!saveMetricSettingsStorage(settings)) {
+    return alert(
+      "The metrics were updated, but the settings could not be saved on this device."
+    );
+  }
+
+  renderMetricEditor();
+
+  if (selectedSubject === subject) {
+    await renderGradingComponents();
+  }
+
+  alert(
+    `${subject} metrics updated successfully.`
+  );
+}
+
+// Load saved metric settings immediately for the current workspace.
+function initializeMetricSettings() {
+  applyMetricSettingsForWorkspace(
+    currentWorkspace
+  );
+}
 
 // ============================================
 // AUTHENTICATION
@@ -163,6 +502,9 @@ function setupLogin() {
 function openWorkspace(type) {
   currentWorkspace = type;
 
+  initializeMetricSettings();
+  ensureMetricEditorUI();
+
   document.body.classList.remove(
     "wife-theme",
     "personal-theme"
@@ -228,7 +570,8 @@ async function showSection(section) {
     "attendance",
     "notes",
     "reports",
-    "excel"
+    "excel",
+    "metrics"
   ];
 
   sections.forEach(s => {
@@ -271,6 +614,11 @@ async function showSection(section) {
 
   if (section === "reports") {
     await loadReportStudents();
+  }
+
+  if (section === "metrics") {
+    ensureMetricEditorUI();
+    renderMetricEditor();
   }
 }
 
@@ -711,7 +1059,7 @@ async function renderGradingComponents() {
         </div>
 
         ${
-          component.name === "Attendance"
+          isAttendanceComponent(component)
 
             ? `
               <div class="attendance-grade-info">
@@ -1001,7 +1349,7 @@ async function renderComponentRecords(index) {
   const year =
     await getStudentAcademicYear(studentId);
 
-  if (component.name === "Attendance") {
+  if (isAttendanceComponent(component)) {
 
     const attendance =
       await getAttendancePercentageForStudent(
@@ -1908,7 +2256,7 @@ async function calculateSubjectGrade(
   ) {
 
     if (
-      component.name === "Attendance"
+      isAttendanceComponent(component)
     ) {
 
       const attendance =
@@ -2299,7 +2647,7 @@ async function generateReportCard() {
 
       let componentPercentage = 0;
 
-      if (component.name === "Attendance") {
+      if (isAttendanceComponent(component)) {
 
         const attendanceResult =
           await getAttendancePercentageForStudent(
