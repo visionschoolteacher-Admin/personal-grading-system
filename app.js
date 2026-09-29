@@ -2290,11 +2290,78 @@ async function generateReportCard() {
     overall += grade;
     count++;
 
+    const components =
+      GRADING_COMPONENTS[subject] || [];
+
+    let componentDetails = "";
+
+    for (const component of components) {
+
+      let componentPercentage = 0;
+
+      if (component.name === "Attendance") {
+
+        const attendanceResult =
+          await getAttendancePercentageForStudent(
+            studentId,
+            year,
+            semester
+          );
+
+        componentPercentage =
+          Number(attendanceResult.percentage) || 0;
+
+      } else {
+
+        const grades =
+          await getAllRecords(
+            STORES.grades
+          );
+
+        const records =
+          grades.filter(record =>
+            record.studentId === studentId &&
+            record.workspace === currentWorkspace &&
+            record.academicYear === year &&
+            record.semester === semester &&
+            record.subject === subject &&
+            record.component === component.name
+          );
+
+        if (records.length) {
+
+          componentPercentage =
+            records.reduce(
+              (sum, record) =>
+                sum + Number(record.percentage || 0),
+              0
+            ) / records.length;
+        }
+      }
+
+      componentDetails += `
+        <div class="report-component-detail">
+          <span>
+            ${escapeHTML(component.name)}
+          </span>
+          <strong>
+            ${componentPercentage.toFixed(2)}%
+          </strong>
+        </div>
+      `;
+    }
+
     rows += `
       <tr>
 
         <td>
-          ${escapeHTML(subject)}
+          <strong>
+            ${escapeHTML(subject)}
+          </strong>
+
+          <div class="report-component-list">
+            ${componentDetails}
+          </div>
         </td>
 
         <td>
@@ -2379,8 +2446,8 @@ async function generateReportCard() {
         <thead>
 
           <tr>
-            <th>Subject</th>
-            <th>Grade</th>
+            <th>Subject &amp; Grading Components</th>
+            <th>Final Grade</th>
             <th>Status</th>
           </tr>
 
