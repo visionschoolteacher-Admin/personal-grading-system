@@ -193,7 +193,7 @@ function openWorkspace(type) {
     title.textContent =
       type === "wife"
         ? "👩‍🏫 Wife's Workspace"
-        : "👨‍🏫 My Personal Workspace";
+        : "👨‍🏫 Husband's Workspace";
   }
 
   if (subtitle) {
