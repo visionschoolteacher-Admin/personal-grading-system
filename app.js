@@ -2372,7 +2372,7 @@ async function generateReportCard() {
           ${
             grade >= 75
               ? "PASS"
-              : "Needs Improvement"
+              : "Failed"
           }
         </td>
 
