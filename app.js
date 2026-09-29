@@ -95,32 +95,33 @@ function applyMetricSettingsForWorkspace(workspace) {
 
     if (!Array.isArray(saved)) return;
 
-    const current = GRADING_COMPONENTS[subject];
-
-    saved.forEach((savedComponent, index) => {
-      if (!current[index]) return;
-
-      if (
+    // Restore the complete saved metric list, including metrics added by the teacher.
+    GRADING_COMPONENTS[subject] = saved
+      .filter(savedComponent =>
+        savedComponent &&
         typeof savedComponent.name === "string" &&
         savedComponent.name.trim()
-      ) {
-        current[index].name = savedComponent.name.trim();
-      }
+      )
+      .map(savedComponent => {
+        const component = {
+          name: savedComponent.name.trim(),
+          weight: Number(savedComponent.weight)
+        };
 
-      const weight = Number(savedComponent.weight);
+        if (
+          savedComponent.type === "attendance" ||
+          component.name === "Attendance"
+        ) {
+          component.type = "attendance";
+        }
 
-      if (
-        Number.isFinite(weight) &&
-        weight >= 0 &&
-        weight <= 100
-      ) {
-        current[index].weight = weight;
-      }
-
-      if (isAttendanceComponent(current[index])) {
-        current[index].type = "attendance";
-      }
-    });
+        return component;
+      })
+      .filter(component =>
+        Number.isFinite(component.weight) &&
+        component.weight >= 0 &&
+        component.weight <= 100
+      );
   });
 }
 
@@ -245,6 +246,13 @@ function renderMetricEditor() {
           <div class="form-actions">
             <button
               type="button"
+              class="secondary-button"
+              onclick="addNewMetric('${subject}')">
+              ➕ Add New Metric
+            </button>
+
+            <button
+              type="button"
               class="primary-button"
               onclick="saveMetricSettings('${subject}')">
               💾 Save ${escapeHTML(subject)}
@@ -254,6 +262,30 @@ function renderMetricEditor() {
       `;
     })
     .join("");
+}
+
+function addNewMetric(subject) {
+  if (!GRADING_COMPONENTS[subject]) return;
+
+  // Add an empty-weight metric so the teacher can enter the name and
+  // adjust the other percentages before saving the subject.
+  GRADING_COMPONENTS[subject].push({
+    name: "New Metric",
+    weight: 0
+  });
+
+  renderMetricEditor();
+
+  // Put the cursor in the newly added metric name field.
+  const index = GRADING_COMPONENTS[subject].length - 1;
+  const input = document.getElementById(
+    `metricName-${subject}-${index}`
+  );
+
+  if (input) {
+    input.focus();
+    input.select();
+  }
 }
 
 async function saveMetricSettings(subject) {
