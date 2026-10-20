@@ -603,6 +603,7 @@ async function showSection(section) {
     "notes",
     "reports",
     "excel",
+    "rankings",
     "metrics"
   ];
 
@@ -652,6 +653,138 @@ async function showSection(section) {
     ensureMetricEditorUI();
     renderMetricEditor();
   }
+
+  if (section === "rankings") {
+    await initializeRankingFilters();
+    await renderStudentRankings();
+  }
+}
+
+// ============================================
+// STUDENT RANKINGS — ADDITIVE FEATURE ONLY
+// Uses existing student and grade records; no schema changes.
+// ============================================
+
+async function initializeRankingFilters() {
+  const yearSelect = document.getElementById("rankingYear");
+  if (!yearSelect || !currentWorkspace) return;
+
+  const students = await getAllRecords(STORES.students);
+  const years = [...new Set(students
+    .filter(student => student.workspace === currentWorkspace)
+    .map(student => student.academicYear)
+    .filter(Boolean))]
+    .sort((a, b) => b.localeCompare(a));
+
+  const currentValue = yearSelect.value;
+  yearSelect.innerHTML = '<option value="">Select academic year</option>' +
+    years.map(year => `<option value="${escapeHTML(year)}">${escapeHTML(year)}</option>`).join("");
+
+  if (years.includes(currentValue)) {
+    yearSelect.value = currentValue;
+  } else {
+    const existingYear = document.getElementById("academicYearSelect")?.value;
+    yearSelect.value = years.includes(existingYear) ? existingYear : (years[0] || "");
+  }
+}
+
+async function renderStudentRankings() {
+  const results = document.getElementById("rankingResults");
+  const summary = document.getElementById("rankingSummary");
+  const year = document.getElementById("rankingYear")?.value || "";
+  const semester = document.getElementById("rankingSemester")?.value || "first";
+  const subject = document.getElementById("rankingSubject")?.value || "Overall";
+  if (!results || !summary) return;
+
+  if (!currentWorkspace) {
+    results.innerHTML = '<div class="empty-state"><h3>No workspace selected</h3></div>';
+    summary.innerHTML = "";
+    return;
+  }
+  if (!year) {
+    results.innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><h3>No academic year selected</h3><p>Add students or choose an academic year to view rankings.</p></div>';
+    summary.innerHTML = "";
+    return;
+  }
+
+  results.innerHTML = '<div class="empty-state">Calculating rankings…</div>';
+  const allStudents = await getAllRecords(STORES.students);
+  const allGrades = await getAllRecords(STORES.grades);
+  const students = allStudents.filter(student =>
+    student.workspace === currentWorkspace && student.academicYear === year
+  );
+
+  const ranked = [];
+  for (const student of students) {
+    const subjectsToCheck = subject === "Overall"
+      ? Object.keys(GRADING_COMPONENTS)
+      : [subject];
+    const subjectGrades = [];
+
+    for (const subjectName of subjectsToCheck) {
+      const hasRecords = allGrades.some(record =>
+        Number(record.studentId) === Number(student.id) &&
+        record.workspace === currentWorkspace &&
+        record.academicYear === year &&
+        record.semester === semester &&
+        record.subject === subjectName
+      );
+      if (!hasRecords) continue;
+
+      const grade = await calculateSubjectGrade(
+        Number(student.id), year, semester, subjectName
+      );
+      subjectGrades.push({ subject: subjectName, grade: Number(grade) || 0 });
+    }
+
+    // Do not rank students with no grade records for the selected semester.
+    if (!subjectGrades.length) continue;
+    const overall = subjectGrades.reduce((sum, item) => sum + item.grade, 0) / subjectGrades.length;
+    ranked.push({
+      id: student.id,
+      name: student.name || "Unnamed student",
+      section: student.section || "",
+      grade: subject === "Overall" ? overall : subjectGrades[0].grade,
+      subjectsCount: subjectGrades.length
+    });
+  }
+
+  ranked.sort((a, b) => b.grade - a.grade || a.name.localeCompare(b.name));
+  const topTen = ranked.slice(0, 10);
+  const label = subject === "Overall" ? "Overall Grade" : `${subject} Grade`;
+  const average = ranked.length
+    ? ranked.reduce((sum, item) => sum + item.grade, 0) / ranked.length
+    : 0;
+  const first = ranked[0];
+
+  summary.innerHTML = `
+    <div class="ranking-stat"><span>👨‍🎓</span><small>Students ranked</small><strong>${ranked.length}</strong></div>
+    <div class="ranking-stat"><span>🏆</span><small>Top student</small><strong>${first ? escapeHTML(first.name) : "—"}</strong><small>${first ? `${first.grade.toFixed(2)}%` : "No grades yet"}</small></div>
+    <div class="ranking-stat"><span>📊</span><small>Average ${escapeHTML(label)}</small><strong>${ranked.length ? average.toFixed(2) + "%" : "—"}</strong></div>
+  `;
+
+  if (!topTen.length) {
+    results.innerHTML = '<div class="empty-state"><div class="empty-icon">📚</div><h3>No grades found</h3><p>There are no saved grades for this academic year, semester, and selection yet.</p></div>';
+    return;
+  }
+
+  results.innerHTML = `
+    <div class="ranking-card">
+      <div class="ranking-card-heading"><div><h3>🏆 Top ${topTen.length} Students</h3><p>${escapeHTML(year)} · ${semester === "first" ? "First Semester" : "Second Semester"} · ${escapeHTML(label)}</p></div></div>
+      <div class="ranking-list">
+        ${topTen.map((student, index) => `
+          <div class="ranking-row">
+            <div class="ranking-place place-${index + 1}">${index + 1}</div>
+            <div class="ranking-student"><strong>${escapeHTML(student.name)}</strong><small>${escapeHTML(student.section || "Student")}</small></div>
+            <div class="ranking-bar-track"><div class="ranking-bar" style="width:${Math.max(0, Math.min(100, student.grade))}%"></div></div>
+            <strong class="ranking-grade">${student.grade.toFixed(2)}%</strong>
+          </div>
+        `).join("")}
+      </div>
+      <p class="ranking-note">Rankings are calculated from existing saved grades in this workspace. Overall grade averages only subjects with saved grade records for the selected semester.</p>
+    </div>
+    ${ranked.length > 10 ? `<div class="ranking-card ranking-full-list"><h3>All Ranked Students (${ranked.length})</h3><div class="ranking-table-wrap"><table class="ranking-table"><thead><tr><th>Rank</th><th>Student</th><th>Section</th><th>${escapeHTML(label)}</th></tr></thead><tbody>${ranked.map((student, index) => `<tr><td>${index + 1}</td><td>${escapeHTML(student.name)}</td><td>${escapeHTML(student.section || "—")}</td><td>${student.grade.toFixed(2)}%</td></tr>`).join("")}</tbody></table></div></div>` : ""}
+  `;
 }
 
 // ============================================
