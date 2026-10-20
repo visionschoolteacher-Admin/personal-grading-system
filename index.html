@@ -188,6 +188,10 @@
   📥 <span>Excel</span>
 </button>
 
+<button class="nav-button" onclick="showSection('rankings')">
+  🏆 <span>Rankings</span>
+</button>
+
 </nav>
 
 
@@ -853,6 +857,18 @@ The monthly attendance export automatically groups each student's attendance by 
 
 </section>
 
+
+<!-- STUDENT RANKINGS (ADDITIVE) -->
+<section id="rankingsSection" class="workspace-section hidden">
+  <div class="section-header"><div><h2>🏆 Student Rankings</h2><p>View student performance using grades already saved in this workspace.</p></div><button class="secondary-button" type="button" onclick="renderStudentRankings()">↻ Refresh</button></div>
+  <div class="info-card ranking-filters">
+    <div><label for="rankingYear">Academic Year</label><select id="rankingYear" onchange="renderStudentRankings()"><option value="">Select academic year</option></select></div>
+    <div><label for="rankingSemester">Semester</label><select id="rankingSemester" onchange="renderStudentRankings()"><option value="first">First Semester (August–December)</option><option value="second">Second Semester (January–May)</option></select></div>
+    <div><label for="rankingSubject">Ranking</label><select id="rankingSubject" onchange="renderStudentRankings()"><option value="Overall">Overall grade (subjects with records)</option><option value="English">English</option><option value="Mathematics">Mathematics</option><option value="Science">Science</option></select></div>
+  </div>
+  <div id="rankingSummary" class="ranking-summary"></div>
+  <div id="rankingResults" class="ranking-results"><div class="empty-state"><div class="empty-icon">🏆</div><h3>Choose an academic year</h3><p>Rankings use saved grades for the selected workspace and semester.</p></div></div>
+</section>
 
 </main>
 
